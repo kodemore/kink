@@ -1,4 +1,5 @@
 from inspect import isclass
+from inspect import signature
 from typing import Any
 from typing import Callable
 from typing import Dict
@@ -31,7 +32,7 @@ def set_resolver(resolver: Union[Type[Resolver], dict, Callable]):
 def _inspect_function_arguments(
     function: Callable,
 ) -> Tuple[Tuple[str, ...], Dict[str, type]]:
-    argument_names: Tuple[str, ...] = function.__code__.co_varnames
+    argument_names: Tuple[str, ...] = tuple(signature(function).parameters.keys())
     argument_types = {}
     for name in argument_names:
         if name in function.__annotations__:

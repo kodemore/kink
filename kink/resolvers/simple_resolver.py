@@ -1,3 +1,4 @@
+from inspect import signature
 from typing import Any
 
 from kink.errors.binding_error import BindingError
@@ -6,11 +7,12 @@ from .resolver import Resolver
 
 
 class SimpleResolver(Resolver):
-    def __init__(self, obj: object, memoize=True, **params):
+    def __init__(self, function: object, memoize=True, **params):
         self.memoize = memoize
         self.params = params
-        self.object = obj
-        arguments = obj.__code__.co_varnames  # type: ignore
+        self.object = function
+        self.memoized_values = {}
+        arguments = tuple(signature(function).parameters.keys())  # type: ignore
         for param in params.keys():
             if param not in arguments:
                 raise BindingError(
@@ -19,8 +21,12 @@ class SimpleResolver(Resolver):
 
     def __call__(self, param_name: str, param_type: type, context: type) -> Any:
         if param_name in self.params:
-            if self.memoize and callable(self.params[param_name]):
-                self.params[param_name] = self.params[param_name]()
+            if self.memoize:
+                if param_name in self.memoized_values:
+                    return self.memoized_values[param_name]
+                if callable(self.params[param_name]):
+                    self.memoized_values[param_name] = self.params[param_name]()
+                    return self.memoized_values[param_name]
 
             return self.params[param_name]
 

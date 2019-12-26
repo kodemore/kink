@@ -107,3 +107,23 @@ def test_bind_initialiser():
     instance = ConstructorInjection(0, 0)
     assert instance.a == 0
     assert instance.b == 0
+
+
+def test_inject_factory_which_returns_callable():
+    set_resolver(SimpleResolver)
+
+    def resolve_a():
+        def _inner_a():
+            return "a"
+
+        return _inner_a
+
+    class A:
+        @inject(a=resolve_a)
+        def get_a(self, a):
+            return a()
+
+    instance = A()
+
+    assert instance.get_a() == "a"
+    assert instance.get_a() == "a"
