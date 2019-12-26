@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kink"
-version = "0.1.0"
+version = "0.1.1"
 description = "Dependency injection for python."
 authors = [
     "Dawid Kraczkowski <dawid.kraczkowski@gmail.com>"
@@ -8,11 +8,11 @@ authors = [
 license = "MIT"
 readme = "README.md"
 
-keywords = ["charm", "dependency injection"]
+keywords = ["kink", "dependency injection"]
 
-homepage = "https://github.com/kodemore/charmed"
-repository = "https://github.com/kodemore/charmed"
-documentation = "https://github.com/kodemore/charmed"
+homepage = "https://github.com/kodemore/kink"
+repository = "https://github.com/kodemore/kink"
+documentation = "https://github.com/kodemore/kink"
 
 classifiers = [
     "Topic :: Software Development :: Libraries",
