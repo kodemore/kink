@@ -1,4 +1,4 @@
-# Kink [![Build Status](https://travis-ci.org/kodemore/charm.svg?branch=master)](https://travis-ci.org/kodemore/charm) [![codecov](https://codecov.io/gh/kodemore/charm/branch/master/graph/badge.svg)](https://codecov.io/gh/kodemore/charm)
+# Kink [![Build Status](https://travis-ci.org/kodemore/kink.svg?branch=master)](https://travis-ci.org/kodemore/kink) [![codecov](https://codecov.io/gh/kodemore/kink/branch/master/graph/badge.svg)](https://codecov.io/gh/kodemore/kink)
 Dependency injection made for python
 
 ## Features
@@ -12,7 +12,7 @@ Dependency injection made for python
 ## Installation
 
 ```
-pip install charm
+pip install kink
 ```
 
 # Usage
@@ -92,9 +92,9 @@ print_a_b_c(gimme_c="c") # will print; a, b, c
 
 ## Defining custom dependency resolver
 
-Charms supports two types of dependency resolvers:
+Kink supports two types of dependency resolvers:
 - callables which accepts 3 parameters; property name, property type and context
-- classes implementing `charm.resolvers.Resolver` protocol (see `simple_resolver.py` for example implementation)
+- classes implementing `kink.resolvers.Resolver` protocol (see `simple_resolver.py` for example implementation)
 
 ```python
 from kink import inject, set_resolver
