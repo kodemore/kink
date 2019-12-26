@@ -1,0 +1,2 @@
+class DependencyError(RuntimeError):
+    pass

@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "charm"
+version = "0.1.0"
+description = "Dependency injection for python."
+authors = [
+    "Dawid Kraczkowski <dawid.kraczkowski@gmail.com>"
+]
+license = "MIT"
+readme = "README.md"
+
+keywords = ["charm", "dependency injection"]
+
+homepage = "https://github.com/kodemore/charm"
+repository = "https://github.com/kodemore/charm"
+documentation = "https://github.com/kodemore/charm"
+
+classifiers = [
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules"
+]
+
+# Requirements
+[tool.poetry.dependencies]
+python = "^3.7"
+typing_extensions = "^3.7.4"
+
+[tool.poetry.dev-dependencies]
+pytest = "^4.1.0"
+pytest-cov = "^2.5"
+mypy = "^0.730.0"
+black = { version = "^19.3b0", python = "^3.6" }
+
