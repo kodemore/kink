@@ -1,5 +1,7 @@
 from typing import Any
-from typing_extensions import Protocol, runtime
+
+from typing_extensions import Protocol
+from typing_extensions import runtime
 
 
 @runtime

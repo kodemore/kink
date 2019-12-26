@@ -1,8 +1,10 @@
 from inspect import isclass
 from typing import Any
 from typing import Callable
+from typing import Dict
+from typing import Tuple
 from typing import Type
-from typing import Union, Tuple, Dict
+from typing import Union
 
 from .errors import DependencyError
 from .errors import ExecutionError
@@ -26,7 +28,9 @@ def set_resolver(resolver: Union[Type[Resolver], dict, Callable]):
     RESOLVER = resolver
 
 
-def _inspect_function_arguments(function: Callable) -> Tuple[Tuple[str, ...], Dict[str, type]]:
+def _inspect_function_arguments(
+    function: Callable,
+) -> Tuple[Tuple[str, ...], Dict[str, type]]:
     argument_names: Tuple[str, ...] = function.__code__.co_varnames
     argument_types = {}
     for name in argument_names:
@@ -38,7 +42,9 @@ def _inspect_function_arguments(function: Callable) -> Tuple[Tuple[str, ...], Di
     return argument_names, argument_types
 
 
-def _instantiate_resolver(function: Callable, resolver: Union[Type[Resolver], Callable], resolver_args) -> Callable:
+def _instantiate_resolver(
+    function: Callable, resolver: Union[Type[Resolver], Callable], resolver_args
+) -> Callable:
     if isclass(resolver):
         return resolver(function, **resolver_args)  # type: ignore
 
@@ -69,7 +75,9 @@ def inject(**resolver_args):
 
             for name in missing_arguments:
                 try:
-                    resolved_arguments[name] = resolve(name, argument_types[name], function)
+                    resolved_arguments[name] = resolve(
+                        name, argument_types[name], function
+                    )
                 except ResolverError:
                     continue
 
@@ -80,7 +88,6 @@ def inject(**resolver_args):
 
             return function(**resolved_arguments)
 
-        setattr(_decorated, "__origin__", function)
         return _decorated
 
     return _decorate
