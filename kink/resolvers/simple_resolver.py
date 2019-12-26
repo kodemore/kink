@@ -1,5 +1,6 @@
 from inspect import signature
 from typing import Any
+from typing import Dict
 
 from kink.errors.binding_error import BindingError
 from kink.errors.resolver_error import ResolverError
@@ -11,7 +12,7 @@ class SimpleResolver(Resolver):
         self.memoize = memoize
         self.params = params
         self.object = function
-        self.memoized_values = {}
+        self.memoized_values: Dict[str, Any] = {}
         arguments = tuple(signature(function).parameters.keys())  # type: ignore
         for param in params.keys():
             if param not in arguments:
