@@ -2,7 +2,7 @@ from inspect import isclass
 from typing import Any
 from typing import Callable
 from typing import Type
-from typing import Union
+from typing import Union, Tuple, Dict
 
 from .errors import DependencyError
 from .errors import ExecutionError
@@ -26,28 +26,36 @@ def set_resolver(resolver: Union[Type[Resolver], dict, Callable]):
     RESOLVER = resolver
 
 
-def inject(**resolver_config):
-    global RESOLVER
-    resolver = RESOLVER
-
-    def _decorate(func):
-        argument_names = func.__code__.co_varnames
-        argument_types = {}
-        for name in argument_names:
-            if name in func.__annotations__:
-                argument_types[name] = func.__annotations__[name]
-            else:
-                argument_types[name] = Any
-
-        if isclass(resolver):
-            resolve = resolver(func, **resolver_config)
+def _inspect_function_arguments(function: Callable) -> Tuple[Tuple[str, ...], Dict[str, type]]:
+    argument_names: Tuple[str, ...] = function.__code__.co_varnames
+    argument_types = {}
+    for name in argument_names:
+        if name in function.__annotations__:
+            argument_types[name] = function.__annotations__[name]
         else:
-            resolve = resolver
+            argument_types[name] = Any
+
+    return argument_names, argument_types
+
+
+def _instantiate_resolver(function: Callable, resolver: Union[Type[Resolver], Callable], resolver_args) -> Callable:
+    if isclass(resolver):
+        return resolver(function, **resolver_args)  # type: ignore
+
+    return resolver
+
+
+def inject(**resolver_args):
+    global RESOLVER
+
+    def _decorate(function: Callable):
+        argument_names, argument_types = _inspect_function_arguments(function)
+        resolve = _instantiate_resolver(function, RESOLVER, resolver_args)
 
         def _decorated(*args, **kwargs):
             # all arguments were passed
             if len(args) == len(argument_names):
-                return func(*args)
+                return function(*args)
 
             # attach named arguments
             resolved_arguments = {**kwargs}
@@ -61,7 +69,7 @@ def inject(**resolver_config):
 
             for name in missing_arguments:
                 try:
-                    resolved_arguments[name] = resolve(name, argument_types[name], func)
+                    resolved_arguments[name] = resolve(name, argument_types[name], function)
                 except ResolverError:
                     continue
 
@@ -70,9 +78,9 @@ def inject(**resolver_config):
                     "Cannot execute function without required parameters. Did you forget to bind required parameters?"
                 )
 
-            return func(**resolved_arguments)
+            return function(**resolved_arguments)
 
-        setattr(_decorated, "__origin__", func)
+        setattr(_decorated, "__origin__", function)
         return _decorated
 
     return _decorate
