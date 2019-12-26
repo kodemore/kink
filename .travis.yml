@@ -36,6 +36,6 @@ jobs:
     - stage: codecov
       python: "3.7"
       script:
-        - pytest --ignore venv -W ignore::DeprecationWarning --cov=charm tests --cov-report=term-missing
+        - pytest --ignore venv -W ignore::DeprecationWarning --cov=kink tests --cov-report=term-missing
         - pip install codecov
         - codecov

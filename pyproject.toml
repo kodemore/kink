@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "charm"
+name = "kink"
 version = "0.1.0"
 description = "Dependency injection for python."
 authors = [
@@ -10,9 +10,9 @@ readme = "README.md"
 
 keywords = ["charm", "dependency injection"]
 
-homepage = "https://github.com/kodemore/charm"
-repository = "https://github.com/kodemore/charm"
-documentation = "https://github.com/kodemore/charm"
+homepage = "https://github.com/kodemore/charmed"
+repository = "https://github.com/kodemore/charmed"
+documentation = "https://github.com/kodemore/charmed"
 
 classifiers = [
     "Topic :: Software Development :: Libraries",

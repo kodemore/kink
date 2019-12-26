@@ -1,6 +1,6 @@
-from charm import inject
-from charm import set_resolver
-from charm.errors import ResolverError
+from kink import inject
+from kink import set_resolver
+from kink.errors import ResolverError
 
 
 def resolve_dependency(param_name: str, param_type: type, context):

@@ -1,5 +1,5 @@
-from charm import inject
-from charm import set_resolver
+from kink import inject
+from kink import set_resolver
 
 SERVICES = {
     "test": "test",

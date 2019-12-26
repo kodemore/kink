@@ -1,6 +1,6 @@
 from typing import Any
 
-from charm.errors.resolver_error import ResolverError
+from kink.errors.resolver_error import ResolverError
 from .resolver import Resolver
 
 

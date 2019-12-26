@@ -1,7 +1,7 @@
 from typing import Any
 
-from charm.errors.binding_error import BindingError
-from charm.errors.resolver_error import ResolverError
+from kink.errors.binding_error import BindingError
+from kink.errors.resolver_error import ResolverError
 from .resolver import Resolver
 
 

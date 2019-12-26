@@ -1,10 +1,10 @@
 import pytest
 
-from charm import inject
-from charm import set_resolver
-from charm.errors import BindingError
-from charm.errors import ExecutionError
-from charm.resolvers import SimpleResolver
+from kink import inject
+from kink import set_resolver
+from kink.errors import BindingError
+from kink.errors import ExecutionError
+from kink.resolvers import SimpleResolver
 
 
 def test_can_call_bound_function():

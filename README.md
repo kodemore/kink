@@ -1,4 +1,4 @@
-# Charm [![Build Status](https://travis-ci.org/kodemore/charm.svg?branch=master)](https://travis-ci.org/kodemore/charm) [![codecov](https://codecov.io/gh/kodemore/charm/branch/master/graph/badge.svg)](https://codecov.io/gh/kodemore/charm)
+# Kink [![Build Status](https://travis-ci.org/kodemore/charm.svg?branch=master)](https://travis-ci.org/kodemore/charm) [![codecov](https://codecov.io/gh/kodemore/charm/branch/master/graph/badge.svg)](https://codecov.io/gh/kodemore/charm)
 Dependency injection made for python
 
 ## Features
@@ -20,7 +20,7 @@ pip install charm
 ## Simple dependency resolver
 
 ```python
-from charm import inject
+from kink import inject
 from os import getenv
 
 @inject(dsn=getenv("DB_DSN"), password=getenv("DB_PASSWORD"))
@@ -34,7 +34,7 @@ connection_with_custom_password = get_database(password="secret")
 
 ### Nested dependencies resolving
 ```python
-from charm import inject
+from kink import inject
 from os import getenv
 
 @inject(dsn=getenv("DB_DSN"), password=getenv("DB_PASSWORD"))
@@ -58,7 +58,7 @@ get_user(12, mock_connection) # you can easily mock connections
 
 ### Constructor injection
 ```python
-from charm import inject
+from kink import inject
 
 def get_connection():
     ...
@@ -75,7 +75,7 @@ class UserRepository:
 ## Setting dictionary as a resolver
 
 ```python
-from charm import inject, set_resolver
+from kink import inject, set_resolver
 
 set_resolver({
     "gimme_a": "a",
@@ -97,8 +97,8 @@ Charms supports two types of dependency resolvers:
 - classes implementing `charm.resolvers.Resolver` protocol (see `simple_resolver.py` for example implementation)
 
 ```python
-from charm import inject, set_resolver
-from charm.errors import ResolverError
+from kink import inject, set_resolver
+from kink.errors import ResolverError
 
 
 def resolve_dependency_by_type(param_name: str, param_type: type, context):
