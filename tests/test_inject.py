@@ -1,129 +1,75 @@
-import pytest
+from typing import Dict, Union
 
+from kink import di
 from kink import inject
-from kink import set_resolver
-from kink.errors import BindingError
-from kink.errors import ExecutionError
-from kink.resolvers import SimpleResolver
+
+di["a"] = 1
+di["b"] = "test"
+di["c"] = 2
+di["d"] = "test_2"
+di["message"] = "Hello, Tom"
 
 
-def test_can_call_bound_function():
-    set_resolver(SimpleResolver)
-
-    @inject(a=1, b="test")
-    def test_unit(a: int, b: str):
+def test_can_inject_values_to_function():
+    @inject()
+    def inject_test(a: int, b: str):
         return {"a": a, "b": b}
 
-    assert test_unit() == {"a": 1, "b": "test"}
-    assert test_unit(2, "test_2") == {"a": 2, "b": "test_2"}
-    assert test_unit(b="test_3") == {"a": 1, "b": "test_3"}
-    assert test_unit(a=3) == {"a": 3, "b": "test"}
+    assert inject_test() == {"a": 1, "b": "test"}
 
 
-def test_can_resolve_bound_function():
-    set_resolver(SimpleResolver)
+def test_can_override_injected_values():
+    @inject()
+    def inject_test(a: int, b: str):
+        return {"a": a, "b": b}
 
-    def get_config():
-        return {"a": 1, "b": 2}
-
-    @inject(config=get_config)
-    def test_unit(config: dict):
-        return [config["a"], config["b"]]
-
-    assert test_unit() == [1, 2]
-    assert test_unit({"a": 2, "b": 4}) == [2, 4]
+    assert inject_test(12) == {"a": 12, "b": "test"}
+    assert inject_test(b="test_2") == {"a": 1, "b": "test_2"}
+    assert inject_test(12, "test_2") == {"a": 12, "b": "test_2"}
+    assert inject_test() == {"a": 1, "b": "test"}
 
 
-def test_can_resolve_nested_bound_function():
-    set_resolver(SimpleResolver)
-
-    def get_config():
-        return {"a": 1, "b": 2}
-
-    @inject(config=get_config)
-    def get_b(config: dict):
-        return config["b"]
-
-    @inject(config=get_config)
-    def get_a(config: dict):
-        return config["a"]
-
-    @inject(a=get_a, b=get_b)
-    def test_unit(a: int, b: int):
-        return [a, b]
-
-    assert test_unit() == [1, 2]
-    assert get_a() == 1
-    assert get_b() == 2
-    assert test_unit(2) == [2, 2]
-
-
-def test_fail_on_invalid_bind():
-    set_resolver(SimpleResolver)
-
-    with pytest.raises(BindingError):
-
-        @inject(b=2)
-        def test_unit(a: int):
-            ...
-
-
-def test_fail_on_calling_incomplete_bind():
-    set_resolver(SimpleResolver)
-
-    @inject(b=2)
-    def test_unit(a: int, b: int):
-        return [a, b]
-
-    with pytest.raises(ExecutionError):
-        test_unit()
-
-
-def test_bind_initialiser():
-    set_resolver(SimpleResolver)
-
-    class ConstructorInjection:
-        @inject(a=1, b=2)
-        def __init__(self, a: int, b: int):
-            self.a = a
-            self.b = b
-
-    instance = ConstructorInjection()
-    assert instance.a == 1
-    assert instance.b == 2
-
-    instance = ConstructorInjection(2)
-    assert instance.a == 2
-    assert instance.b == 2
-
-    instance = ConstructorInjection(b=3)
-    assert instance.a == 1
-    assert instance.b == 3
-
-    instance = ConstructorInjection(a=3)
-    assert instance.a == 3
-    assert instance.b == 2
-
-    instance = ConstructorInjection(0, 0)
-    assert instance.a == 0
-    assert instance.b == 0
-
-
-def test_inject_factory_which_returns_callable():
-    set_resolver(SimpleResolver)
-
-    def resolve_a():
-        def _inner_a():
-            return "a"
-
-        return _inner_a
-
+def test_can_do_constructor_injection():
+    @inject()
     class A:
-        @inject(a=resolve_a)
-        def get_a(self, a):
-            return a()
+        def __init__(self, message: str):
+            self.message = message
 
     instance = A()
+    assert instance.message == "Hello, Tom"
+    instance = A("Hello, Jack")
+    assert instance.message == "Hello, Jack"
 
-    assert instance.get_a() == "a"
-    assert instance.get_a() == "a"
+
+def test_map_dependencies():
+    @inject(a="c", b="d")
+    def map_dependencies_test(a: int, b: str) -> Dict[str, Union[str, int]]:
+        return {"a": a, "b": b}
+
+    assert map_dependencies_test() == {"a": 2, "b": "test_2"}
+
+
+def test_resolve_complex_dependencies():
+    @inject()
+    class A:
+        def __init__(self, message: str):
+            self.message = message
+
+    @inject()
+    class B:
+        def __init__(self, a: int, a_inst: A):
+            self.a = a
+            self.a_inst = a_inst
+
+    @inject()
+    class C:
+        def __init__(self, a_inst: A, b_inst: B):
+            self.a_inst = a_inst
+            self.b_inst = b_inst
+
+    c_inst = C()
+
+    assert c_inst.a_inst == di[A]
+    assert c_inst.b_inst == di[B]
+    assert c_inst.a_inst == c_inst.b_inst.a_inst
+    assert c_inst.a_inst.message == "Hello, Tom"

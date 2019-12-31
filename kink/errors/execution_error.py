@@ -1,5 +1,5 @@
-from .dependency_error import DependencyError
+from .conainer_error import ContainerError
 
 
-class ExecutionError(DependencyError):
+class ExecutionError(ContainerError):
     pass

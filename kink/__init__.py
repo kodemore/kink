@@ -1,5 +1,6 @@
 from inspect import isclass
 from inspect import signature
+from types import LambdaType
 from typing import Any
 from typing import Callable
 from typing import Dict
@@ -7,26 +8,42 @@ from typing import Tuple
 from typing import Type
 from typing import Union
 
-from .errors import DependencyError
+from kink.errors.resolver_error import ResolverError
+from kink.errors.service_error import ServiceError
+from .errors import ContainerError
 from .errors import ExecutionError
 from .errors import ResolverError
-from .resolvers.kv_resolver import KVResolver
-from .resolvers.resolver import Resolver
-from .resolvers.simple_resolver import SimpleResolver
-
-RESOLVER: Union[Callable, Type[Resolver]] = SimpleResolver
 
 
-def set_resolver(resolver: Union[Type[Resolver], dict, Callable]):
-    global RESOLVER
-    if isinstance(resolver, dict):
-        resolver = KVResolver(resolver)
-    elif not callable(resolver) and not issubclass(resolver, Resolver):
-        raise DependencyError(
-            "Invalid resolver passed to inject decorator, expected: callable, Resolver or dict."
-        )
+class Container:
+    def __init__(self, memoize: bool = True):
+        self.memoize = memoize
+        self._memoized_services: Dict[Union[str, Type], Any] = {}
+        self._services: Dict[Union[str, Type], Any] = {}
 
-    RESOLVER = resolver
+    def __setitem__(self, key: Any, value: Any) -> None:
+        self._services[key] = value
+
+    def __getitem__(self, key: Any) -> Any:
+        if key in self._memoized_services:
+            return self._memoized_services[key]
+
+        if key not in self:
+            raise ServiceError(f"Service {key} is not registered.")
+
+        value = self._services[key]
+
+        if isinstance(value, LambdaType) and value.__name__ == "<lambda>":
+            self._memoized_services[key] = value(self)
+            return self._memoized_services[key]
+
+        return value
+
+    def __contains__(self, key) -> bool:
+        return key in self._services
+
+
+di: Container = Container()
 
 
 def _inspect_function_arguments(
@@ -43,55 +60,75 @@ def _inspect_function_arguments(
     return argument_names, argument_types
 
 
-def _instantiate_resolver(
-    function: Callable, resolver: Union[Type[Resolver], Callable], resolver_args
-) -> Callable:
-    if isclass(resolver):
-        return resolver(function, **resolver_args)  # type: ignore
+def _resolve_function_kwargs(
+    alias_map: Dict[str, str],
+    argument_names: Tuple[str, ...],
+    argument_types: Dict[str, type],
+) -> Dict[str, Any]:
+    resolved_kwargs = {}
+    for name in argument_names:
+        if name in alias_map and alias_map[name] in di:
+            resolved_kwargs[name] = di[alias_map[name]]
+            continue
 
-    return resolver
+        if name in di:
+            resolved_kwargs[name] = di[name]
+            continue
 
+        if argument_types[name] in di:
+            resolved_kwargs[name] = di[argument_types[name]]
+            continue
 
-def inject(**resolver_args):
-    global RESOLVER
-
-    def _decorate(function: Callable):
-        argument_names, argument_types = _inspect_function_arguments(function)
-        resolve = _instantiate_resolver(function, RESOLVER, resolver_args)
-
-        def _decorated(*args, **kwargs):
-            # all arguments were passed
-            if len(args) == len(argument_names):
-                return function(*args)
-
-            # attach named arguments
-            resolved_arguments = {**kwargs}
-
-            # resolve positional arguments
-            if args:
-                for key, value in enumerate(args):
-                    resolved_arguments[argument_names[key]] = value
-
-            missing_arguments = argument_names - resolved_arguments.keys()
-
-            for name in missing_arguments:
-                try:
-                    resolved_arguments[name] = resolve(
-                        name, argument_types[name], function
-                    )
-                except ResolverError:
-                    continue
-
-            if len(resolved_arguments) < len(argument_names):
-                raise ExecutionError(
-                    "Cannot execute function without required parameters. Did you forget to bind required parameters?"
-                )
-
-            return function(**resolved_arguments)
-
-        return _decorated
-
-    return _decorate
+    return resolved_kwargs
 
 
-__all__ = ["inject", "set_resolver"]
+def _decorate(alias_map: Dict[str, str], function: type):  # type: ignore
+    # Add class definition to dependency injection
+    argument_names, argument_types = _inspect_function_arguments(function)
+    cached_kwargs: Dict[str, Any] = {}
+
+    def _decorated(*args, **kwargs):
+        nonlocal cached_kwargs
+
+        # all arguments were passed
+        if len(args) == len(argument_names):
+            return function(*args)
+
+        if not cached_kwargs:
+            cached_kwargs = _resolve_function_kwargs(
+                alias_map, argument_names, argument_types
+            )
+
+        # attach named arguments
+        passed_kwargs = {**kwargs}
+
+        # resolve positional arguments
+        if args:
+            for key, value in enumerate(args):
+                passed_kwargs[argument_names[key]] = value
+
+        all_kwargs = {**cached_kwargs, **passed_kwargs}
+
+        if len(all_kwargs) < len(argument_names):
+            raise ExecutionError(
+                "Cannot execute function without required parameters. Did you forget to bind required parameters?"
+            )
+
+        return function(**all_kwargs)
+
+    return _decorated
+
+
+def inject(**alias_map: str):
+    def _decorator(obj: type):
+        if isclass(obj):
+            di[obj] = lambda di: obj()
+            setattr(obj, "__init__", _decorate(alias_map, getattr(obj, "__init__")))
+            return obj
+
+        return _decorate(alias_map, obj)
+
+    return _decorator
+
+
+__all__ = ["inject", "Container", "di"]

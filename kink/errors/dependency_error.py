@@ -1,2 +1,0 @@
-class DependencyError(RuntimeError):
-    pass

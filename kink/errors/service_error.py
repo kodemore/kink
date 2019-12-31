@@ -1,5 +1,5 @@
 from .conainer_error import ContainerError
 
 
-class ResolverError(ContainerError):
+class ServiceError(ContainerError, KeyError):
     pass
