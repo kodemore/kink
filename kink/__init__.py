@@ -7,6 +7,7 @@ from typing import Dict
 from typing import Tuple
 from typing import Type
 from typing import Union
+from abc import ABC
 
 from kink.errors.resolver_error import ResolverError
 from kink.errors.service_error import ServiceError
@@ -51,6 +52,7 @@ def _inspect_function_arguments(
 ) -> Tuple[Tuple[str, ...], Dict[str, type]]:
     argument_names: Tuple[str, ...] = tuple(signature(function).parameters.keys())
     argument_types = {}
+
     for name in argument_names:
         if name in function.__annotations__:
             argument_types[name] = function.__annotations__[name]
@@ -83,6 +85,11 @@ def _resolve_function_kwargs(
 
 
 def _decorate(alias_map: Dict[str, str], function: type):  # type: ignore
+
+    # ignore abstract class initializer
+    if function == ABC.__init__:
+        return function
+
     # Add class definition to dependency injection
     argument_names, argument_types = _inspect_function_arguments(function)
     cached_kwargs: Dict[str, Any] = {}
