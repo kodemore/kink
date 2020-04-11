@@ -61,7 +61,7 @@ connection = di["db_connection"] # will return instance of sqlite3.Connection
 assert connection == di["db_connection"] # True
 ```
 
-## Manual dependencies injection
+## Autowiring dependencies
 
 ```python
 from kink import di, inject
@@ -72,7 +72,7 @@ di["db_name"] = "test_db.db"
 di["db_connection"] = lambda di: connect(di["db_name"])
 
 # Inject connection from di, connection is established once function is called.
-@inject()
+@inject
 def get_database(db_connection: Connection):
     ...
 
@@ -93,7 +93,7 @@ di["db_user"] = "user"
 di["db_password"] = "password"
 di["db_connection"] = lambda di: MySQLdb.connect(host=di["db_host"], user=di["db_user"], passwd=di["db_password"], db=di["db_name"])
 
-@inject()
+@inject
 class AbstractRepository:
     def __init__(self, db_connection):
         self.connection = db_connection
@@ -107,6 +107,26 @@ repository = UserRepository()
 repository.connection # mysql db connection is resolved and available to use.
 ```
 
-When class is annotated by `inject` annotation it will be automatically added to the container for future use, like autowiring.
+When class is annotated by `inject` annotation it will be automatically added to the container for future use (eg autowiring).
+
+
+### Services aliasing
+
+When you registering service with `@inject` decorator you can attach your own alias name, please consider the following example:
+
+```python
+from kink import inject
+from typing import Protocol
+
+class IUserRepository(Protocol):
+    ...
+
+@inject(alias=IUserRepository)
+class UserRepository:
+    ...
+
+
+assert di[IUserRepository] == di[UserRepository] # returns true
+```
 
 For more examples check [tests](/tests) directory
