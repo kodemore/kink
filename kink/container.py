@@ -1,5 +1,5 @@
 from types import LambdaType
-from typing import Any, Dict, Type, Union, List
+from typing import Any, Dict, Type, Union
 
 from kink.errors.service_error import ServiceError
 
