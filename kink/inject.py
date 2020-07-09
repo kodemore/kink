@@ -1,6 +1,7 @@
 from abc import ABC
 from inspect import isclass, signature
 from typing import Any, Callable, Dict, Tuple, Type, TypeVar
+import asyncio
 
 from .container import di
 from .errors import ExecutionError
@@ -55,12 +56,8 @@ def _decorate(binding: Dict[str, Any], service: Type[T]) -> Type[T]:  # type: ig
     argument_names, argument_types = _inspect_function_arguments(service)
     cached_kwargs: Dict[str, Any] = {}
 
-    def _decorated(*args, **kwargs):
+    def _resolve_kwargs(args, kwargs) -> dict:
         nonlocal cached_kwargs
-
-        # all arguments were passed
-        if len(args) == len(argument_names):
-            return service(*args)
 
         if not cached_kwargs:
             cached_kwargs = _resolve_function_kwargs(
@@ -82,7 +79,26 @@ def _decorate(binding: Dict[str, Any], service: Type[T]) -> Type[T]:  # type: ig
                 "Cannot execute function without required parameters. Did you forget to bind required parameters?"
             )
 
+        return all_kwargs
+
+    def _decorated(*args, **kwargs):
+        # all arguments were passed
+        if len(args) == len(argument_names):
+            return service(*args)
+
+        all_kwargs = _resolve_kwargs(args, kwargs)
         return service(**all_kwargs)
+
+    async def _async_decorated(*args, **kwargs):
+        # all arguments were passed
+        if len(args) == len(argument_names):
+            return await service(*args)
+
+        all_kwargs = _resolve_kwargs(args, kwargs)
+        return await service(**all_kwargs)
+    
+    if asyncio.iscoroutinefunction(service):
+        return _async_decorated  # type: ignore
 
     return _decorated  # type: ignore
 
