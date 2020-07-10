@@ -7,6 +7,7 @@ Dependency injection made for python
 - Extensible with custom dependency resolvers
 - Automatic dependency injection
 - Lightweight
+- Support for async with asyncio
 
 
 ## Installation
