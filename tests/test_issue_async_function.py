@@ -4,9 +4,9 @@ from starlette.routing import Route
 from starlette.testclient import TestClient
 
 from kink import di, inject
-import inspect
 
-def test_decorate_async() -> None:
+
+def test_resolve_kwargs_in_async_function() -> None:
     di["name"] = "Bob"
 
     @inject
@@ -21,3 +21,21 @@ def test_decorate_async() -> None:
 
     response = test_client.get("/test")
 
+    assert response.status_code == 200
+    assert response.content == b"Hello Bob"
+
+
+def test_resolve_no_parameters_in_async() -> None:
+    @inject
+    async def example(request) -> Response:
+        return Response(f"Hello Bob")
+
+    application = Starlette(routes=[
+        Route("/test", example, methods=["GET"])
+    ])
+    test_client = TestClient(application)
+
+    response = test_client.get("/test")
+
+    assert response.status_code == 200
+    assert response.content == b"Hello Bob"
