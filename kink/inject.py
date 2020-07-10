@@ -1,7 +1,7 @@
 from abc import ABC
+import asyncio
 from inspect import isclass, signature
 from typing import Any, Callable, Dict, Tuple, Type, TypeVar
-import asyncio
 
 from .container import di
 from .errors import ExecutionError
