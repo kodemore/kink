@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kink"
-version = "0.3.1"
+version = "0.3.2"
 description = "Dependency injection for python."
 authors = [
     "Dawid Kraczkowski <dawid.kraczkowski@gmail.com>"
@@ -25,8 +25,11 @@ python = "^3.6"
 typing_extensions = "^3.7.4"
 
 [tool.poetry.dev-dependencies]
-pytest = "^4.1.0"
-pytest-cov = "^2.5"
-mypy = "^0.730.0"
 black = { version = "^19.3b0", python = "^3.6" }
+mypy = "^0.730.0"
+pytest = "^5.4.3"
+pytest-asyncio = "^0.14.0"
+pytest-cov = "^2.5"
+requests = "^2.24.0"
+starlette = "^0.13.4"
 
