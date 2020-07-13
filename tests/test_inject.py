@@ -1,7 +1,9 @@
 from typing import Dict, Union
+import pytest
 
 from kink import di
 from kink import inject
+from kink.errors import ExecutionError
 
 di["a"] = 1
 di["b"] = "test"
@@ -86,3 +88,15 @@ def test_aliasing() -> None:
         ...
 
     assert di[X] == di[IX]
+
+
+def test_execution_error() -> None:
+    @inject
+    def inject_test(missing: str, another_missing: int, a: str) -> bool:
+        return False
+
+    try:
+        inject_test()
+    except ExecutionError as e:
+        assert "`missing`" in str(e)
+        assert "`another_missing`" in str(e)

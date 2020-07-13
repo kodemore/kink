@@ -75,8 +75,12 @@ def _decorate(binding: Dict[str, Any], service: Type[T]) -> Type[T]:  # type: ig
         all_kwargs = {**cached_kwargs, **passed_kwargs}
 
         if len(all_kwargs) < len(argument_names):
+            missing_parameters = [
+                arg for arg in argument_names if arg not in all_kwargs
+            ]
             raise ExecutionError(
-                "Cannot execute function without required parameters. Did you forget to bind required parameters?"
+                "Cannot execute function without required parameters. "
+                + f"Did you forget to bind the following parameters: `{'`, `'.join(missing_parameters)}`?"
             )
 
         return all_kwargs
@@ -96,7 +100,7 @@ def _decorate(binding: Dict[str, Any], service: Type[T]) -> Type[T]:  # type: ig
 
         all_kwargs = _resolve_kwargs(args, kwargs)
         return await service(**all_kwargs)
-    
+
     if asyncio.iscoroutinefunction(service):
         return _async_decorated  # type: ignore
 

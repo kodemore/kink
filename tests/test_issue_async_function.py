@@ -14,9 +14,7 @@ def test_resolve_kwargs_in_async_function() -> None:
         body = await request.body()
         return Response(f"Hello {name}")
 
-    application = Starlette(routes=[
-        Route("/test", example, methods=["GET"])
-    ])
+    application = Starlette(routes=[Route("/test", example, methods=["GET"])])
     test_client = TestClient(application)
 
     response = test_client.get("/test")
@@ -30,9 +28,7 @@ def test_resolve_no_parameters_in_async() -> None:
     async def example(request) -> Response:
         return Response(f"Hello Bob")
 
-    application = Starlette(routes=[
-        Route("/test", example, methods=["GET"])
-    ])
+    application = Starlette(routes=[Route("/test", example, methods=["GET"])])
     test_client = TestClient(application)
 
     response = test_client.get("/test")
