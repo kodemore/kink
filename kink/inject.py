@@ -9,7 +9,7 @@ from .errors import ExecutionError
 T = TypeVar("T")
 
 
-Undefined = NewType('UNDEFINED', type(None))
+Undefined = NewType('Undefined', int)
 
 
 class Parameter:
