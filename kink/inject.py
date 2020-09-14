@@ -1,7 +1,7 @@
 from abc import ABC
 import asyncio
-from inspect import isclass, signature
-from typing import Any, Callable, Dict, Tuple, Type, TypeVar
+from inspect import isclass, signature, Parameter as InspectParameter
+from typing import Any, Callable, Dict, Tuple, Type, TypeVar, NewType
 
 from .container import di
 from .errors import ExecutionError
@@ -9,28 +9,43 @@ from .errors import ExecutionError
 T = TypeVar("T")
 
 
+Undefined = NewType('UNDEFINED', type(None))
+
+
+class Parameter:
+    type: Any
+    name: str
+    default: Any
+
+    def __init__(self, name: str, type: Any = Any, default: Any = Undefined):
+        self.name = name
+        self.type = type
+        self.default = default
+
+
 def _inspect_function_arguments(
     function: Callable,
-) -> Tuple[Tuple[str, ...], Dict[str, type]]:
-    argument_names: Tuple[str, ...] = tuple(signature(function).parameters.keys())
-    argument_types = {}
+) -> Tuple[Tuple[str, ...], Dict[str, Parameter]]:
+    parameters_name: Tuple[str, ...] = tuple(signature(function).parameters.keys())
+    parameters = {}
 
-    for name in argument_names:
-        if name in function.__annotations__:
-            argument_types[name] = function.__annotations__[name]
-        else:
-            argument_types[name] = Any
+    for name, parameter in signature(function).parameters.items():
+        parameters[name] = Parameter(
+            parameter.name,
+            parameter.annotation,
+            parameter.default if parameter.default is not InspectParameter.empty else Undefined
+        )
 
-    return argument_names, argument_types
+    return parameters_name, parameters
 
 
 def _resolve_function_kwargs(
     alias_map: Dict[str, str],
-    argument_names: Tuple[str, ...],
-    argument_types: Dict[str, type],
+    parameters_name: Tuple[str, ...],
+    parameters: Dict[str, Parameter],
 ) -> Dict[str, Any]:
     resolved_kwargs = {}
-    for name in argument_names:
+    for name in parameters_name:
         if name in alias_map and alias_map[name] in di:
             resolved_kwargs[name] = di[alias_map[name]]
             continue
@@ -39,9 +54,12 @@ def _resolve_function_kwargs(
             resolved_kwargs[name] = di[name]
             continue
 
-        if argument_types[name] in di:
-            resolved_kwargs[name] = di[argument_types[name]]
+        if parameters[name].type in di:
+            resolved_kwargs[name] = di[parameters[name].type]
             continue
+
+        if parameters[name].default is not Undefined:
+            resolved_kwargs[name] = parameters[name].default
 
     return resolved_kwargs
 
@@ -53,7 +71,7 @@ def _decorate(binding: Dict[str, Any], service: Type[T]) -> Type[T]:  # type: ig
         return service
 
     # Add class definition to dependency injection
-    argument_names, argument_types = _inspect_function_arguments(service)
+    parameters_name, parameters = _inspect_function_arguments(service)
     cached_kwargs: Dict[str, Any] = {}
 
     def _resolve_kwargs(args, kwargs) -> dict:
@@ -61,7 +79,7 @@ def _decorate(binding: Dict[str, Any], service: Type[T]) -> Type[T]:  # type: ig
 
         if not cached_kwargs:
             cached_kwargs = _resolve_function_kwargs(
-                binding, argument_names, argument_types
+                binding, parameters_name, parameters
             )
 
         # attach named arguments
@@ -70,13 +88,13 @@ def _decorate(binding: Dict[str, Any], service: Type[T]) -> Type[T]:  # type: ig
         # resolve positional arguments
         if args:
             for key, value in enumerate(args):
-                passed_kwargs[argument_names[key]] = value
+                passed_kwargs[parameters_name[key]] = value
 
         all_kwargs = {**cached_kwargs, **passed_kwargs}
 
-        if len(all_kwargs) < len(argument_names):
+        if len(all_kwargs) < len(parameters_name):
             missing_parameters = [
-                arg for arg in argument_names if arg not in all_kwargs
+                arg for arg in parameters_name if arg not in all_kwargs
             ]
             raise ExecutionError(
                 "Cannot execute function without required parameters. "
@@ -87,7 +105,7 @@ def _decorate(binding: Dict[str, Any], service: Type[T]) -> Type[T]:  # type: ig
 
     def _decorated(*args, **kwargs):
         # all arguments were passed
-        if len(args) == len(argument_names):
+        if len(args) == len(parameters_name):
             return service(*args)
 
         all_kwargs = _resolve_kwargs(args, kwargs)
@@ -95,7 +113,7 @@ def _decorate(binding: Dict[str, Any], service: Type[T]) -> Type[T]:  # type: ig
 
     async def _async_decorated(*args, **kwargs):
         # all arguments were passed
-        if len(args) == len(argument_names):
+        if len(args) == len(parameters_name):
             return await service(*args)
 
         all_kwargs = _resolve_kwargs(args, kwargs)
