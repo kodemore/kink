@@ -9,7 +9,7 @@ from .errors import ExecutionError
 T = TypeVar("T")
 
 
-Undefined = NewType('Undefined', int)
+Undefined = NewType("Undefined", int)
 
 
 class Parameter:
@@ -33,7 +33,9 @@ def _inspect_function_arguments(
         parameters[name] = Parameter(
             parameter.name,
             parameter.annotation,
-            parameter.default if parameter.default is not InspectParameter.empty else Undefined
+            parameter.default
+            if parameter.default is not InspectParameter.empty
+            else Undefined,
         )
 
     return parameters_name, parameters
@@ -108,6 +110,9 @@ def _decorate(binding: Dict[str, Any], service: Type[T]) -> Type[T]:  # type: ig
         if len(args) == len(parameters_name):
             return service(*args)
 
+        if parameters_name == tuple(kwargs.keys()):
+            return service(**kwargs)
+
         all_kwargs = _resolve_kwargs(args, kwargs)
         return service(**all_kwargs)
 
@@ -115,6 +120,9 @@ def _decorate(binding: Dict[str, Any], service: Type[T]) -> Type[T]:  # type: ig
         # all arguments were passed
         if len(args) == len(parameters_name):
             return await service(*args)
+
+        if parameters_name == tuple(kwargs.keys()):
+            return await service(**kwargs)
 
         all_kwargs = _resolve_kwargs(args, kwargs)
         return await service(**all_kwargs)
