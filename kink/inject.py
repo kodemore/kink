@@ -79,11 +79,6 @@ def _decorate(binding: Dict[str, Any], service: Type[T]) -> Type[T]:  # type: ig
     def _resolve_kwargs(args, kwargs) -> dict:
         nonlocal cached_kwargs
 
-        if not cached_kwargs:
-            cached_kwargs = _resolve_function_kwargs(
-                binding, parameters_name, parameters
-            )
-
         # attach named arguments
         passed_kwargs = {**kwargs}
 
@@ -91,6 +86,16 @@ def _decorate(binding: Dict[str, Any], service: Type[T]) -> Type[T]:  # type: ig
         if args:
             for key, value in enumerate(args):
                 passed_kwargs[parameters_name[key]] = value
+
+        # prioritise passed kwargs and args resolving
+        if len(passed_kwargs) == len(parameters_name):
+            return passed_kwargs
+
+        # we still miss parameters lets check cache and di for further resolvance
+        if not cached_kwargs:
+            cached_kwargs = _resolve_function_kwargs(
+                binding, parameters_name, parameters
+            )
 
         all_kwargs = {**cached_kwargs, **passed_kwargs}
 
@@ -108,7 +113,7 @@ def _decorate(binding: Dict[str, Any], service: Type[T]) -> Type[T]:  # type: ig
     def _decorated(*args, **kwargs):
         # all arguments were passed
         if len(args) == len(parameters_name):
-            return service(*args)
+            return service(*args, **kwargs)
 
         if parameters_name == tuple(kwargs.keys()):
             return service(**kwargs)
