@@ -24,8 +24,10 @@ classifiers = [
 python = "^3.6"
 typing_extensions = "^3.7.4"
 
+
 [tool.poetry.dev-dependencies]
 black = { version = "^19.3b0", python = "^3.6" }
+isort = "^5.7.0"
 mypy = "^0.730.0"
 pytest = "^5.4.3"
 pytest-asyncio = "^0.14.0"

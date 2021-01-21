@@ -23,9 +23,7 @@ class Parameter:
         self.default = default
 
 
-def _inspect_function_arguments(
-    function: Callable,
-) -> Tuple[Tuple[str, ...], Dict[str, Parameter]]:
+def _inspect_function_arguments(function: Callable,) -> Tuple[Tuple[str, ...], Dict[str, Parameter]]:
     parameters_name: Tuple[str, ...] = tuple(signature(function).parameters.keys())
     parameters = {}
 
@@ -33,18 +31,14 @@ def _inspect_function_arguments(
         parameters[name] = Parameter(
             parameter.name,
             parameter.annotation,
-            parameter.default
-            if parameter.default is not InspectParameter.empty
-            else Undefined,
+            parameter.default if parameter.default is not InspectParameter.empty else Undefined,
         )
 
     return parameters_name, parameters
 
 
 def _resolve_function_kwargs(
-    alias_map: Dict[str, str],
-    parameters_name: Tuple[str, ...],
-    parameters: Dict[str, Parameter],
+    alias_map: Dict[str, str], parameters_name: Tuple[str, ...], parameters: Dict[str, Parameter],
 ) -> Dict[str, Any]:
     resolved_kwargs = {}
     for name in parameters_name:
@@ -93,16 +87,12 @@ def _decorate(binding: Dict[str, Any], service: Type[T]) -> Type[T]:  # type: ig
 
         # we still miss parameters lets check cache and di for further resolvance
         if not cached_kwargs:
-            cached_kwargs = _resolve_function_kwargs(
-                binding, parameters_name, parameters
-            )
+            cached_kwargs = _resolve_function_kwargs(binding, parameters_name, parameters)
 
         all_kwargs = {**cached_kwargs, **passed_kwargs}
 
         if len(all_kwargs) < len(parameters_name):
-            missing_parameters = [
-                arg for arg in parameters_name if arg not in all_kwargs
-            ]
+            missing_parameters = [arg for arg in parameters_name if arg not in all_kwargs]
             raise ExecutionError(
                 "Cannot execute function without required parameters. "
                 + f"Did you forget to bind the following parameters: `{'`, `'.join(missing_parameters)}`?"
@@ -138,16 +128,12 @@ def _decorate(binding: Dict[str, Any], service: Type[T]) -> Type[T]:  # type: ig
     return _decorated  # type: ignore
 
 
-def inject(
-    _service: Type[T] = None, alias: Any = None, bind: Dict[str, Any] = None
-) -> Type[T]:
+def inject(_service: Type[T] = None, alias: Any = None, bind: Dict[str, Any] = None) -> Type[T]:
     def _decorator(_service: Type[T]) -> Type[T]:
         if isclass(_service):
             di[_service] = lambda _di: _service()
             setattr(
-                _service,
-                "__init__",
-                _decorate(bind or {}, getattr(_service, "__init__")),
+                _service, "__init__", _decorate(bind or {}, getattr(_service, "__init__")),
             )
             if alias:
                 di[alias] = lambda _di: _di[_service]
