@@ -1,7 +1,9 @@
-from abc import ABC
 import asyncio
-from inspect import isclass, signature, Parameter as InspectParameter
-from typing import Any, Callable, Dict, Tuple, Type, TypeVar, NewType
+from abc import ABC
+from inspect import Parameter as InspectParameter, isclass, signature
+from typing import Any, Callable, Dict, NewType, Tuple, Type, TypeVar
+
+from typing_extensions import Protocol
 
 from .container import di
 from .errors import ExecutionError
@@ -10,6 +12,13 @@ T = TypeVar("T")
 
 
 Undefined = NewType("Undefined", int)
+
+
+class _ProtocolInit(Protocol):
+    pass
+
+
+_no_init = _ProtocolInit.__init__
 
 
 class Parameter:
@@ -63,7 +72,7 @@ def _resolve_function_kwargs(
 def _decorate(binding: Dict[str, Any], service: Type[T]) -> Type[T]:  # type: ignore
 
     # ignore abstract class initializer
-    if service == ABC.__init__:
+    if service in [ABC.__init__, _no_init]:
         return service
 
     # Add class definition to dependency injection
