@@ -1,4 +1,4 @@
-# Kink [![Build Status](https://travis-ci.org/kodemore/kink.svg?branch=master)](https://travis-ci.org/kodemore/kink) [![codecov](https://codecov.io/gh/kodemore/kink/branch/master/graph/badge.svg)](https://codecov.io/gh/kodemore/kink)
+# Kink ![PyPI](https://img.shields.io/pypi/v/kink) ![Linting and Tests](https://github.com/kodemore/kink/workflows/Linting%20and%20Tests/badge.svg?branch=master) [![codecov](https://codecov.io/gh/kodemore/kink/branch/master/graph/badge.svg)](https://codecov.io/gh/kodemore/kink)
 Dependency injection made for python
 
 ## Features
