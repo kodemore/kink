@@ -1,7 +1,6 @@
-from typing import Protocol
+from typing_extensions import Protocol
 
-from kink import di
-from kink import inject
+from kink import di, inject
 
 
 class ExampleProtocol(Protocol):
