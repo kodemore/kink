@@ -71,8 +71,8 @@ def _resolve_function_kwargs(
 
 def _decorate(binding: Dict[str, Any], service: Type[T]) -> Type[T]:  # type: ignore
 
-    # ignore abstract class initializer
-    if service in [ABC.__init__, _no_init]:
+    # ignore abstract class initialiser and protocol initialisers
+    if service in [ABC.__init__, _no_init] or service.__name__ == "_no_init":  # FIXME: fix this when typing_extensions library gets fixed
         return service
 
     # Add class definition to dependency injection
