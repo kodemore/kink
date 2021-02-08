@@ -12,6 +12,9 @@ class Container:
     def __setitem__(self, key: Union[str, Type], value: Any) -> None:
         self._services[key] = value
 
+        if key in self._memoized_services:
+            del(self._memoized_services[key])
+
     def __getitem__(self, key: Union[str, Type]) -> Any:
         if key in self._memoized_services:
             return self._memoized_services[key]

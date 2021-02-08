@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kink"
-version = "0.3.8"
+version = "0.4.0"
 description = "Dependency injection for python."
 authors = [
     "Dawid Kraczkowski <dawid.kraczkowski@gmail.com>"

@@ -1,7 +1,7 @@
 from typing import Dict, Union
 import pytest
 
-from kink import di
+from kink import di, Container
 from kink import inject
 from kink.errors import ExecutionError
 
@@ -100,3 +100,14 @@ def test_execution_error() -> None:
     except ExecutionError as e:
         assert "`missing`" in str(e)
         assert "`another_missing`" in str(e)
+
+
+def test_inject_with_custom_di() -> None:
+    my_di = Container()
+    my_di["a"] = "Some A"
+
+    @inject(container=my_di)
+    def test_a(a: str) -> str:
+        return a
+
+    assert test_a() == "Some A"
