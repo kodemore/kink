@@ -5,7 +5,7 @@ from typing import Any, Callable, Dict, NewType, Tuple, Type, TypeVar
 
 from typing_extensions import Protocol
 
-from .container import di
+from .container import di, Container
 from .errors import ExecutionError
 
 T = TypeVar("T")
@@ -47,20 +47,23 @@ def _inspect_function_arguments(function: Callable,) -> Tuple[Tuple[str, ...], D
 
 
 def _resolve_function_kwargs(
-    alias_map: Dict[str, str], parameters_name: Tuple[str, ...], parameters: Dict[str, Parameter],
+    alias_map: Dict[str, str],
+    parameters_name: Tuple[str, ...],
+    parameters: Dict[str, Parameter],
+    container: Container
 ) -> Dict[str, Any]:
     resolved_kwargs = {}
     for name in parameters_name:
-        if name in alias_map and alias_map[name] in di:
-            resolved_kwargs[name] = di[alias_map[name]]
+        if name in alias_map and alias_map[name] in container:
+            resolved_kwargs[name] = container[alias_map[name]]
             continue
 
-        if name in di:
-            resolved_kwargs[name] = di[name]
+        if name in container:
+            resolved_kwargs[name] = container[name]
             continue
 
-        if parameters[name].type in di:
-            resolved_kwargs[name] = di[parameters[name].type]
+        if parameters[name].type in container:
+            resolved_kwargs[name] = container[parameters[name].type]
             continue
 
         if parameters[name].default is not Undefined:
@@ -69,7 +72,7 @@ def _resolve_function_kwargs(
     return resolved_kwargs
 
 
-def _decorate(binding: Dict[str, Any], service: Type[T]) -> Type[T]:  # type: ignore
+def _decorate(binding: Dict[str, Any], service: Type[T], container: Container) -> Type[T]:  # type: ignore
 
     # ignore abstract class initialiser and protocol initialisers
     if service in [ABC.__init__, _no_init] or service.__name__ == "_no_init":  # FIXME: fix this when typing_extensions library gets fixed
@@ -96,7 +99,7 @@ def _decorate(binding: Dict[str, Any], service: Type[T]) -> Type[T]:  # type: ig
 
         # we still miss parameters lets check cache and di for further resolvance
         if not cached_kwargs:
-            cached_kwargs = _resolve_function_kwargs(binding, parameters_name, parameters)
+            cached_kwargs = _resolve_function_kwargs(binding, parameters_name, parameters, container)
 
         all_kwargs = {**cached_kwargs, **passed_kwargs}
 
@@ -137,20 +140,25 @@ def _decorate(binding: Dict[str, Any], service: Type[T]) -> Type[T]:  # type: ig
     return _decorated  # type: ignore
 
 
-def inject(_service: Type[T] = None, alias: Any = None, bind: Dict[str, Any] = None) -> Type[T]:
+def inject(
+    _service: Type[T] = None,
+    alias: Any = None,
+    bind: Dict[str, Any] = None,
+    container: Container = di
+) -> Type[T]:
     def _decorator(_service: Type[T]) -> Type[T]:
         if isclass(_service):
-            di[_service] = lambda _di: _service()
+            container[_service] = lambda _di: _service()
             setattr(
-                _service, "__init__", _decorate(bind or {}, getattr(_service, "__init__")),
+                _service, "__init__", _decorate(bind or {}, getattr(_service, "__init__"), container),
             )
             if alias:
-                di[alias] = lambda _di: _di[_service]
+                container[alias] = lambda _di: _di[_service]
 
             return _service
-        service_function = _decorate(bind or {}, _service)
+        service_function = _decorate(bind or {}, _service, container)
         if alias:
-            di[alias] = service_function
+            container[alias] = service_function
 
         return service_function
 
