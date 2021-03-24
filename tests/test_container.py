@@ -66,7 +66,7 @@ def test_set_factored_service() -> None:
 
 def test_clear_cache() -> None:
     container = Container()
-    container['time'] = lambda di: time.time_ns()
+    container['time'] = lambda di: time.time()
 
     time_a = container['time']
     time_b = container['time']

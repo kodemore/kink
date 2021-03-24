@@ -119,7 +119,7 @@ def test_inject_as_factory() -> None:
     @inject(use_factory=True)
     class X:
         def __init__(self):
-            self.time = time.time_ns()
+            self.time = time.time()
 
     x_1 = di[X]
     x_2 = di[X]
