@@ -1,4 +1,5 @@
 from kink import Container
+import time
 
 
 def test_instantiate_simple_container():
@@ -40,7 +41,7 @@ def test_get_callable_service():
     assert container["test_2"] == 12
 
 
-def test_set_class_as_service():
+def test_set_class_as_service() -> None:
     class A:
         ...
 
@@ -48,3 +49,33 @@ def test_set_class_as_service():
     container[A] = A()
 
     assert A in container
+    assert container[A] == container[A]
+    assert isinstance(container[A], A)
+
+
+def test_set_factored_service() -> None:
+    class A:
+        ...
+    container = Container()
+    container.factories[A] = lambda di: A()
+
+    assert A in container
+    assert container[A] != container[A]
+    assert isinstance(container[A], A)
+
+
+def test_clear_cache() -> None:
+    container = Container()
+    container['time'] = lambda di: time.time()
+
+    time_a = container['time']
+    time_b = container['time']
+
+    assert time_a == time_b
+
+    container.clear_cache()
+    time_c = container['time']
+    time_d = container['time']
+
+    assert time_c != time_a
+    assert time_c == time_d

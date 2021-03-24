@@ -80,11 +80,8 @@ def _decorate(binding: Dict[str, Any], service: Type[T], container: Container) -
 
     # Add class definition to dependency injection
     parameters_name, parameters = _inspect_function_arguments(service)
-    cached_kwargs: Dict[str, Any] = {}
 
     def _resolve_kwargs(args, kwargs) -> dict:
-        nonlocal cached_kwargs
-
         # attach named arguments
         passed_kwargs = {**kwargs}
 
@@ -97,11 +94,9 @@ def _decorate(binding: Dict[str, Any], service: Type[T], container: Container) -
         if len(passed_kwargs) == len(parameters_name):
             return passed_kwargs
 
-        # we still miss parameters lets check cache and di for further resolvance
-        if not cached_kwargs:
-            cached_kwargs = _resolve_function_kwargs(binding, parameters_name, parameters, container)
+        resolved_kwargs = _resolve_function_kwargs(binding, parameters_name, parameters, container)
 
-        all_kwargs = {**cached_kwargs, **passed_kwargs}
+        all_kwargs = {**resolved_kwargs, **passed_kwargs}
 
         if len(all_kwargs) < len(parameters_name):
             missing_parameters = [arg for arg in parameters_name if arg not in all_kwargs]
@@ -144,18 +139,25 @@ def inject(
     _service: Type[T] = None,
     alias: Any = None,
     bind: Dict[str, Any] = None,
-    container: Container = di
+    container: Container = di,
+    use_factory: bool = False,
 ) -> Type[T]:
     def _decorator(_service: Type[T]) -> Type[T]:
         if isclass(_service):
-            container[_service] = lambda _di: _service()
             setattr(
                 _service, "__init__", _decorate(bind or {}, getattr(_service, "__init__"), container),
             )
-            if alias:
-                container[alias] = lambda _di: _di[_service]
+            if use_factory:
+                container.factories[_service] = lambda _di: _service()
+                if alias:
+                    container.factories[alias] = container.factories[_service]
+            else:
+                container[_service] = lambda _di: _service()
+                if alias:
+                    container[alias] = lambda _di: container[_service]
 
             return _service
+
         service_function = _decorate(bind or {}, _service, container)
         if alias:
             container[alias] = service_function

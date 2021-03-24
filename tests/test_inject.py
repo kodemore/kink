@@ -4,6 +4,7 @@ import pytest
 from kink import di, Container
 from kink import inject
 from kink.errors import ExecutionError
+import time
 
 di["a"] = 1
 di["b"] = "test"
@@ -111,3 +112,17 @@ def test_inject_with_custom_di() -> None:
         return a
 
     assert test_a() == "Some A"
+
+
+def test_inject_as_factory() -> None:
+
+    @inject(use_factory=True)
+    class X:
+        def __init__(self):
+            self.time = time.time()
+
+    x_1 = di[X]
+    x_2 = di[X]
+
+    assert x_1 != x_2
+    assert x_1.time != x_2.time

@@ -43,7 +43,27 @@ from sqlite3 import connect
 di["db_connection"] = lambda di: connect(di["db_name"])
 ```
 
-In this scenario connection to database will not be established until service is requested.
+> In this scenario connection to database will not be established until service is requested.
+
+## Adding factorised services to dependency injection
+
+Factorised services are services that are instantiated every time they are requested.
+
+```python
+from kink import di
+from sqlite3 import connect
+
+di.factories["db_connection"] = lambda di: connect(di["db_name"])
+
+connection_1 = di["db_connection"]
+connection_2 = di["db_connection"]
+
+connection_1 != connection_2
+```
+
+In the above example we defined factorised service `di_connection`, and below by accessing the service from di we created
+two separate connection to database.
+
 
 ## Requesting services fromm dependency injection container
 
@@ -131,3 +151,13 @@ assert di[IUserRepository] == di[UserRepository] # returns true
 ```
 
 For more examples check [tests](/tests) directory
+
+### Clearing di cache
+
+```python
+from kink import inject, di
+
+... # set and accesss your services
+
+di.clear_cache() # this will clear cache of all services inside di container that are not factorised services
+```
