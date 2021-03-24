@@ -1,5 +1,5 @@
 from types import LambdaType
-from typing import Any, Dict, Type, Union
+from typing import Any, Dict, Type, Union, Callable
 
 from kink.errors.service_error import ServiceError
 
@@ -8,6 +8,7 @@ class Container:
     def __init__(self):
         self._memoized_services: Dict[Union[str, Type], Any] = {}
         self._services: Dict[Union[str, Type], Any] = {}
+        self._factories: Dict[Union[str, Type], Callable[[Container], Any]] = {}
 
     def __setitem__(self, key: Union[str, Type], value: Any) -> None:
         self._services[key] = value
@@ -16,6 +17,9 @@ class Container:
             del(self._memoized_services[key])
 
     def __getitem__(self, key: Union[str, Type]) -> Any:
+        if key in self._factories:
+            return self._factories[key](self)
+
         if key in self._memoized_services:
             return self._memoized_services[key]
 
@@ -31,7 +35,14 @@ class Container:
         return value
 
     def __contains__(self, key) -> bool:
-        return key in self._services
+        return key in self._services or key in self._factories
+
+    @property
+    def factories(self) -> Dict[Union[str, Type], Callable[['Container'], Any]]:
+        return self._factories
+
+    def clear_cache(self) -> None:
+        self._memoized_services = {}
 
 
 di: Container = Container()
