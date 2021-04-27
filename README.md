@@ -65,7 +65,7 @@ In the above example we defined factorised service `db_connection`, and below by
 two separate connection to database.
 
 
-## Requesting services fromm dependency injection container
+## Requesting services from dependency injection container
 
 ```python
 from kink import di
