@@ -102,6 +102,25 @@ connection = get_database()
 connection_with_passed_connection = get_database(connect("temp.db")) # will use passed connection
 ```
 
+Autowire system can also benefit from type annotations, please consider the following example:
+
+```python
+from kink import di, inject
+from sqlite3 import connect, Connection
+
+
+di["db_name"] = "test_db.db"
+di[Connection] = lambda di: connect(di["db_name"])
+
+@inject
+class UserRepository:
+  def __init__(self, db: Connection): # `db` argument will be resolved because `Connection` instance is present in the container. 
+    self.db = db
+
+repo = di[UserRepository]
+assert repo.db == di[Connection] # True
+```
+
 ### Constructor injection
 ```python
 from kink import inject, di
