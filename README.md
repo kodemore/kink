@@ -133,7 +133,7 @@ When class is annotated by `inject` annotation it will be automatically added to
 
 ### Services aliasing
 
-When you registering service with `@inject` decorator you can attach your own alias name, please consider the following example:
+When you register a service with `@inject` decorator you can attach your own alias name, please consider the following example:
 
 ```python
 from kink import inject
