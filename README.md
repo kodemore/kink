@@ -61,7 +61,7 @@ connection_2 = di["db_connection"]
 connection_1 != connection_2
 ```
 
-In the above example we defined factorised service `di_connection`, and below by accessing the service from di we created
+In the above example we defined factorised service `db_connection`, and below by accessing the service from di we created
 two separate connection to database.
 
 
