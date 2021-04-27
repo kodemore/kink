@@ -61,11 +61,11 @@ connection_2 = di["db_connection"]
 connection_1 != connection_2
 ```
 
-In the above example we defined factorised service `di_connection`, and below by accessing the service from di we created
+In the above example we defined factorised service `db_connection`, and below by accessing the service from di we created
 two separate connection to database.
 
 
-## Requesting services fromm dependency injection container
+## Requesting services from dependency injection container
 
 ```python
 from kink import di
@@ -133,7 +133,7 @@ When class is annotated by `inject` annotation it will be automatically added to
 
 ### Services aliasing
 
-When you registering service with `@inject` decorator you can attach your own alias name, please consider the following example:
+When you register a service with `@inject` decorator you can attach your own alias name, please consider the following example:
 
 ```python
 from kink import inject
