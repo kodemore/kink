@@ -1,20 +1,72 @@
-# Kink ![PyPI](https://img.shields.io/pypi/v/kink) ![Linting and Tests](https://github.com/kodemore/kink/workflows/Linting%20and%20Tests/badge.svg?branch=master) [![codecov](https://codecov.io/gh/kodemore/kink/branch/master/graph/badge.svg)](https://codecov.io/gh/kodemore/kink)
-Dependency injection made for python
+# Kink ![PyPI](https://img.shields.io/pypi/v/kink) ![Linting and Tests](https://github.com/kodemore/kink/workflows/Linting%20and%20Tests/badge.svg?branch=master) [![codecov](https://codecov.io/gh/kodemore/kink/branch/master/graph/badge.svg)](https://codecov.io/gh/kodemore/kink) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+Dependency injection container made for python
 
 ## Features
 
 - Easy to use interface
 - Extensible with custom dependency resolvers
-- Automatic dependency injection
+- Automatic dependency injection (Autowiring)
 - Lightweight
 - Support for async with asyncio
 
 
 ## Installation
 
-```
+### Pip
+
+```shell
 pip install kink
 ```
+
+### Poetry
+If you don't know poetry, I highly recommend visiting their [webpage](https://python-poetry.org)
+
+```shell
+poetry add kink
+```
+
+# Why using dependency injection in python?
+
+*Short story*: Because python is a multi paradigm language and this should encourage 
+you to use best OOP practices improving your workflow and your code and have more time
+for your hobbies and families instead monkey-patching entire world.
+
+*Long story*
+
+Dependency happens when one component (component might be a class, or a function) `A` uses other component 
+`B`. We say than that `A` depends on `B`.
+
+Instead hardcoding dependency inside your components and making your code tightly coupled
+you are loosing it by providing(injecting) required behaviour either by subclassing or
+plugging additional code. This is called `Inversion of Control` which keeps your code
+oriented around behaviour rather than control. There are many benefits coming out of it:
+- increased modularity
+- better extensibility and flexibility
+- it helps you understand higher concepts like event driven programming
+
+This is where dependency injection comes in place. Dependency injection is a specific
+style of inversion of control, which generally says instead hardcoding dependency pass
+dependant object as a parameter to a method rather than having method creating it itself.
+( who would thought it is so easy :)? ). It can go even further than that; when you pass
+a dependency don't rely on a particular implementation rely on an abstraction (dependency inversion principle).
+
+So you might ask why do I need it? Here is couple reasons:
+
+*Relying on the global state is evil*
+Coding is hard enough ( business requirements are changing all the time, deadlines are
+shortening, clients wants more, there are so many unknowns you have to figure out), 
+relying on unpredictable state makes it even harder:
+- it might introduce potential bugs
+- makes code harder to maintain
+- concurrency becomes harder to achieve
+- balancing mokey-patching well is a hard task
+
+*Great, but now I have additional work I have to manage now all my 
+dependencies write more code and deadlines are coming even closer!*
+
+True, that is why you should pick up Dependency Injection Container to do all this work 
+for you. Kink gives you one decorator and simple dict-like object to setup your `config`.
+No need for manual work and manual dependency management. Give it a try and you will love it!
 
 # Usage
 
