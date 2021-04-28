@@ -27,11 +27,13 @@ poetry add kink
 
 # Why using dependency injection in python?
 
-*Short story*: Because python is a multi paradigm language and this should encourage 
+## Short story 
+
+Because python is a multi paradigm language and this should encourage 
 you to use best OOP practices improving your workflow and your code and have more time
 for your hobbies and families instead monkey-patching entire world.
 
-*Long story*
+## Long story
 
 Dependency happens when one component (component might be a class, or a function) `A` uses other component 
 `B`. We say than that `A` depends on `B`.
@@ -52,7 +54,8 @@ a dependency don't rely on a particular implementation rely on an abstraction (d
 
 So you might ask why do I need it? Here is couple reasons:
 
-*Relying on the global state is evil*
+### Relying on the global state is evil
+
 Coding is hard enough ( business requirements are changing all the time, deadlines are
 shortening, clients wants more, there are so many unknowns you have to figure out), 
 relying on unpredictable state makes it even harder:
@@ -61,8 +64,7 @@ relying on unpredictable state makes it even harder:
 - concurrency becomes harder to achieve
 - balancing mokey-patching well is a hard task
 
-*Great, but now I have additional work I have to manage now all my 
-dependencies write more code and deadlines are coming even closer!*
+### Great, but now I have additional work I have to manage now all my dependencies write more code and deadlines are coming even closer!
 
 True, that is why you should pick up Dependency Injection Container to do all this work 
 for you. Kink gives you one decorator and simple dict-like object to setup your `config`.
