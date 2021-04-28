@@ -50,7 +50,7 @@ This is where dependency injection comes in place. Dependency injection is a spe
 style of inversion of control, which generally says instead hardcoding dependency pass
 dependant object as a parameter to a method rather than having method creating it itself.
 ( who would thought it is so easy :)? ). It can go even further than that; when you pass
-a dependency don't rely on a particular implementation rely on an abstraction (dependency inversion principle).
+a dependency don't rely on a particular implementation rely on an abstraction (`Dependency Inversion Principle`).
 
 So you might ask why do I need it? Here is couple reasons:
 
