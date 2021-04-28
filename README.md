@@ -70,7 +70,15 @@ No need for manual work and manual dependency management. Give it a try and you 
 
 # Usage
 
-## Adding service to dependency injection container
+To fully utilise the potential of kink it is recommended to bootstrap your initial dependencies
+(config values, or instances of classes that are standalone, requires no other dependencies than themselves).
+Some people prefer to keep it in `__init__.py` in the top module of your application, other
+create separate `bootstra.py` file for this purpose. Once all is setup the only step left 
+is to decorate your classes/functions with `@inject` decorator.
+
+## Bootstrapping/Adding services manually
+
+### Adding *service* to di container
 
 Dependency container is a dict-like object, adding new service to dependency container is as 
 simple as the following example:
@@ -83,10 +91,10 @@ di["db_name"] = getenv("DB_NAME")
 di["db_password"] = getenv("DB_PASSWORD")
 ```
 
-## Adding service factory to dependency injection container
+### Adding *on-demand service* to dependency injection container
 
-Kink also supports on-demand service creation. In order to define such a service, lambda function
-should be used: 
+Kink also supports on-demand service creation. In order to define such a service, 
+lambda function should be used: 
 
 ```python
 from kink import di
@@ -95,9 +103,9 @@ from sqlite3 import connect
 di["db_connection"] = lambda di: connect(di["db_name"])
 ```
 
-> In this scenario connection to database will not be established until service is requested.
+In this scenario connection to database will not be established until service is requested.
 
-## Adding factorised services to dependency injection
+### Adding factorised services to dependency injection
 
 Factorised services are services that are instantiated every time they are requested.
 
@@ -119,52 +127,70 @@ two separate connection to database.
 
 ## Requesting services from dependency injection container
 
+To access given service just reference it inside `di` like you would do this with
+a normal dictionary, full example below:
+
 ```python
 from kink import di
 from sqlite3 import connect
 
-# Setting services
+# Bootstrapping
 di["db_name"] = "test_db.db"
 di["db_connection"] = lambda di: connect(di["db_name"])
 
 
-# Getting service
-
+# Getting a service
 connection = di["db_connection"] # will return instance of sqlite3.Connection
 assert connection == di["db_connection"] # True
 ```
 
+
 ## Autowiring dependencies
 
+Autowiring is the ability of the container to automatically create and inject dependencies.
+It detects dependencies of the component tries to search for references in the container
+and if all references are present an instance of requested service is returned.
+
+Autowiring system in kink works in two ways:
+- matching argument's names
+- matching argument's type annotation
+
+### How dependencies are prioritised by autowiring mechanism
+
+Autowiring mechanism priorities dependencies automatically, so when multiple
+matches are found for the service this is how it works;
+Firstly passed arguments are prioritied - if you pass arguments manually to the service
+they will take precendence over anything else. Next argument's names are taken into
+consideration and last but not least argument's type annotations.
+
+### Matching argument's names
+
+If you don't like type annotations or would like to take advantage of autowiring's 
+precedence mechanism use this style.
+
+This is a very simple mechanism we have already seen in previous examples. 
+Autowiring system checks function argument's names and tries to search for 
+services with the same names inside the container. 
+
+### Matching argument's type annotations
+
+If you are like me and like type annotations and use static analysis tools this is
+a preferred way working with DI container. 
+
+In this scenario names are ignored instead argument's type annotations are inspected
+and looked up inside di container. This requires aliases when bootstrapping 
+your services in DI container or simply adding them to container in the way that
+its type is the key by which service is accessed. Please consider the following example:
+
 ```python
 from kink import di, inject
 from sqlite3 import connect, Connection
 
 
 di["db_name"] = "test_db.db"
-di["db_connection"] = lambda di: connect(di["db_name"])
+di[Connection] = lambda di: connect(di["db_name"])  # sqlite connection can be accessed by its type
 
-# Inject connection from di, connection is established once function is called.
-@inject
-def get_database(db_connection: Connection):
-    ...
-
-
-connection = get_database()
-connection_with_passed_connection = get_database(connect("temp.db")) # will use passed connection
-```
-
-Autowire system can also benefit from type annotations, please consider the following example:
-
-```python
-from kink import di, inject
-from sqlite3 import connect, Connection
-
-
-di["db_name"] = "test_db.db"
-di[Connection] = lambda di: connect(di["db_name"])
-
-@inject
+@inject # Constructor innjection will happen here
 class UserRepository:
   def __init__(self, db: Connection): # `db` argument will be resolved because `Connection` instance is present in the container. 
     self.db = db
@@ -173,7 +199,7 @@ repo = di[UserRepository]
 assert repo.db == di[Connection] # True
 ```
 
-### Constructor injection
+## Constructor injection
 ```python
 from kink import inject, di
 import MySQLdb
@@ -202,7 +228,7 @@ repository.connection # mysql db connection is resolved and available to use.
 When class is annotated by `inject` annotation it will be automatically added to the container for future use (eg autowiring).
 
 
-### Services aliasing
+## Services aliasing
 
 When you register a service with `@inject` decorator you can attach your own alias name, please consider the following example:
 
@@ -223,7 +249,10 @@ assert di[IUserRepository] == di[UserRepository] # returns true
 
 For more examples check [tests](/tests) directory
 
-### Clearing di cache
+## Clearing di cache
+
+Sometimes it might come handy to clear cached services in di container. Simple way of 
+doing this is calling `di.clear_cache()` method like in the following example.
 
 ```python
 from kink import inject, di
