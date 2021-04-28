@@ -67,7 +67,8 @@ relying on unpredictable state makes it even harder:
 ### Great, but now I have additional work I have to manage now all my dependencies write more code and deadlines are coming even closer!
 
 True, that is why you should pick up Dependency Injection Container to do all this work 
-for you. Kink gives you one decorator and simple dict-like object to setup your `config`.
+for you. Kink gives you one decorator and simple `dict-like` object to bootstrap and manipulate
+your container.
 No need for manual work and manual dependency management. Give it a try and you will love it!
 
 # Usage
