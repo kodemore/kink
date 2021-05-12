@@ -1,4 +1,5 @@
 import asyncio
+from functools import wraps
 from abc import ABC
 from inspect import Parameter as InspectParameter, isclass, signature
 from typing import Any, Callable, Dict, NewType, Tuple, Type, TypeVar
@@ -107,6 +108,7 @@ def _decorate(binding: Dict[str, Any], service: Type[T], container: Container) -
 
         return all_kwargs
 
+    @wraps(service)
     def _decorated(*args, **kwargs):
         # all arguments were passed
         if len(args) == len(parameters_name):
@@ -118,6 +120,7 @@ def _decorate(binding: Dict[str, Any], service: Type[T], container: Container) -
         all_kwargs = _resolve_kwargs(args, kwargs)
         return service(**all_kwargs)
 
+    @wraps(service)
     async def _async_decorated(*args, **kwargs):
         # all arguments were passed
         if len(args) == len(parameters_name):
