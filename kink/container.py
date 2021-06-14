@@ -1,5 +1,5 @@
 from types import LambdaType
-from typing import Any, Dict, Type, Union, Callable, List, Set
+from typing import Any, Dict, Type, Union, Callable, List, Generic
 
 from kink.errors.service_error import ServiceError
 
@@ -9,7 +9,7 @@ class Container:
         self._memoized_services: Dict[Union[str, Type], Any] = {}
         self._services: Dict[Union[str, Type], Any] = {}
         self._factories: Dict[Union[str, Type], Callable[[Container], Any]] = {}
-        self._aliases: Dict[Union[str, Type], List[Any]] = {}
+        self._aliases: Dict[Union[str, Type], List[Union[str, Type]]] = {}
 
     def __setitem__(self, key: Union[str, Type], value: Any) -> None:
         self._services[key] = value
@@ -18,8 +18,8 @@ class Container:
             del(self._memoized_services[key])
 
     def add_alias(self, name: Union[str, Type], target: Union[str, Type]):
-        if List[target] in self._memoized_services:
-            del self._memoized_services[List[target]]
+        if List[target] in self._memoized_services:  # type: ignore
+            del self._memoized_services[List[target]]  # type: ignore
 
         if name not in self._aliases:
             self._aliases[name] = []
@@ -42,7 +42,7 @@ class Container:
 
         # Support aliasing
         if self._has_alias_list_for(key):
-            result = [self._get(alias) for alias in self._aliases[key.__args__[0]]]
+            result = [self._get(alias) for alias in self._aliases[key.__args__[0]]]  # type: ignore
             self._memoized_services[key] = result
             return result
 
@@ -76,7 +76,7 @@ class Container:
 
     def _has_alias_list_for(self, key: Union[str, Type]) -> bool:
         return hasattr(key, "__origin__") and hasattr(key, "__args__") and \
-               key.__origin__ == list and key.__args__[0] in self._aliases
+               key.__origin__ == list and key.__args__[0] in self._aliases  # type: ignore
 
     @property
     def factories(self) -> Dict[Union[str, Type], Callable[['Container'], Any]]:
