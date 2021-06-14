@@ -153,17 +153,18 @@ def inject(
             if use_factory:
                 container.factories[_service] = lambda _di: _service()
                 if alias:
-                    container.factories[alias] = container.factories[_service]
+                    container.add_alias(alias, _service)
             else:
                 container[_service] = lambda _di: _service()
                 if alias:
-                    container[alias] = lambda _di: container[_service]
+                    container.add_alias(alias, _service)
 
             return _service
 
         service_function = _decorate(bind or {}, _service, container)
+        container[service_function.__name__] = service_function
         if alias:
-            container[alias] = service_function
+            container.add_alias(alias, service_function.__name__)
 
         return service_function
 
