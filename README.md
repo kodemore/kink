@@ -273,7 +273,7 @@ class MongoUserRepository:
 class MySQLUserRepository:
     ...
 
-@inject(register=False)
+@inject()
 class UserRepository:
     def __init__(self, repos: List[IUserRepository]) -> None: # all services that alias to IUserRepository will be passed here
         self._repos = repos
