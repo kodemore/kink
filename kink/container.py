@@ -15,7 +15,7 @@ class Container:
         self._services[key] = value
 
         if key in self._memoized_services:
-            del(self._memoized_services[key])
+            del self._memoized_services[key]
 
     def add_alias(self, name: Union[str, Type], target: Union[str, Type]):
         if List[target] in self._memoized_services:  # type: ignore
@@ -75,11 +75,10 @@ class Container:
         return False
 
     def _has_alias_list_for(self, key: Union[str, Type]) -> bool:
-        return hasattr(key, "__origin__") and hasattr(key, "__args__") and \
-               key.__origin__ == list and key.__args__[0] in self._aliases  # type: ignore
+        return hasattr(key, "__origin__") and hasattr(key, "__args__") and key.__origin__ == list and key.__args__[0] in self._aliases  # type: ignore
 
     @property
-    def factories(self) -> Dict[Union[str, Type], Callable[['Container'], Any]]:
+    def factories(self) -> Dict[Union[str, Type], Callable[["Container"], Any]]:
         return self._factories
 
     def clear_cache(self) -> None:

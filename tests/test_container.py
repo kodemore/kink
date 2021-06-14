@@ -58,6 +58,7 @@ def test_set_class_as_service() -> None:
 def test_set_factored_service() -> None:
     class A:
         ...
+
     container = Container()
     container.factories[A] = lambda di: A()
 
@@ -68,16 +69,16 @@ def test_set_factored_service() -> None:
 
 def test_clear_cache() -> None:
     container = Container()
-    container['time'] = lambda di: time.time()
+    container["time"] = lambda di: time.time()
 
-    time_a = container['time']
-    time_b = container['time']
+    time_a = container["time"]
+    time_b = container["time"]
 
     assert time_a == time_b
 
     container.clear_cache()
-    time_c = container['time']
-    time_d = container['time']
+    time_c = container["time"]
+    time_d = container["time"]
 
     assert time_c != time_a
     assert time_c == time_d
@@ -146,4 +147,3 @@ def test_retrieve_all_aliased_items() -> None:
     assert all_items[2] == container[C]
     assert id(all_items) == id(all_items_cached)
     assert List[T] in container
-

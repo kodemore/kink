@@ -48,10 +48,7 @@ def _inspect_function_arguments(function: Callable,) -> Tuple[Tuple[str, ...], D
 
 
 def _resolve_function_kwargs(
-    alias_map: Dict[str, str],
-    parameters_name: Tuple[str, ...],
-    parameters: Dict[str, Parameter],
-    container: Container
+    alias_map: Dict[str, str], parameters_name: Tuple[str, ...], parameters: Dict[str, Parameter], container: Container,
 ) -> Dict[str, Any]:
     resolved_kwargs = {}
     for name in parameters_name:
@@ -76,7 +73,9 @@ def _resolve_function_kwargs(
 def _decorate(binding: Dict[str, Any], service: Type[T], container: Container) -> Type[T]:  # type: ignore
 
     # ignore abstract class initialiser and protocol initialisers
-    if service in [ABC.__init__, _no_init] or service.__name__ == "_no_init":  # FIXME: fix this when typing_extensions library gets fixed
+    if (
+        service in [ABC.__init__, _no_init] or service.__name__ == "_no_init"
+    ):  # FIXME: fix this when typing_extensions library gets fixed
         return service
 
     # Add class definition to dependency injection

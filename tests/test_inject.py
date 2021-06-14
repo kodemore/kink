@@ -116,7 +116,6 @@ def test_inject_with_custom_di() -> None:
 
 
 def test_inject_as_factory() -> None:
-
     @inject(use_factory=True)
     class X:
         def __init__(self):
