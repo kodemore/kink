@@ -48,10 +48,7 @@ def _inspect_function_arguments(function: Callable,) -> Tuple[Tuple[str, ...], D
 
 
 def _resolve_function_kwargs(
-    alias_map: Dict[str, str],
-    parameters_name: Tuple[str, ...],
-    parameters: Dict[str, Parameter],
-    container: Container
+    alias_map: Dict[str, str], parameters_name: Tuple[str, ...], parameters: Dict[str, Parameter], container: Container,
 ) -> Dict[str, Any]:
     resolved_kwargs = {}
     for name in parameters_name:
@@ -76,7 +73,9 @@ def _resolve_function_kwargs(
 def _decorate(binding: Dict[str, Any], service: Type[T], container: Container) -> Type[T]:  # type: ignore
 
     # ignore abstract class initialiser and protocol initialisers
-    if service in [ABC.__init__, _no_init] or service.__name__ == "_no_init":  # FIXME: fix this when typing_extensions library gets fixed
+    if (
+        service in [ABC.__init__, _no_init] or service.__name__ == "_no_init"
+    ):  # FIXME: fix this when typing_extensions library gets fixed
         return service
 
     # Add class definition to dependency injection
@@ -153,17 +152,18 @@ def inject(
             if use_factory:
                 container.factories[_service] = lambda _di: _service()
                 if alias:
-                    container.factories[alias] = container.factories[_service]
+                    container.add_alias(alias, _service)
             else:
                 container[_service] = lambda _di: _service()
                 if alias:
-                    container[alias] = lambda _di: container[_service]
+                    container.add_alias(alias, _service)
 
             return _service
 
         service_function = _decorate(bind or {}, _service, container)
+        container[service_function.__name__] = service_function
         if alias:
-            container[alias] = service_function
+            container.add_alias(alias, service_function.__name__)
 
         return service_function
 

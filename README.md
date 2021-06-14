@@ -252,6 +252,39 @@ assert di[IUserRepository] == di[UserRepository] # returns true
 
 For more examples check [tests](/tests) directory
 
+### Retrieving all instances with the same alias
+Aliases in `kink` do not have to be unique, but by default when autowiring mechnism is called the service that
+was registered first within given alias will be returned. If for some reason you would like to retrieve all
+services that alias to the same name (eg implementing strategy pattern), `kink` provides a useful functionality
+for doing so. Please consider the following example:
+
+```python
+from kink import inject
+from typing import Protocol, List
+
+class IUserRepository(Protocol):
+    ...
+
+@inject(alias=IUserRepository)
+class MongoUserRepository:
+    ...
+
+@inject(alias=IUserRepository)
+class MySQLUserRepository:
+    ...
+
+@inject()
+class UserRepository:
+    def __init__(self, repos: List[IUserRepository]) -> None: # all services that alias to IUserRepository will be passed here
+        self._repos = repos
+        
+    def store_to_mysql(self, user: ...):
+        self._repos[1].store(user)
+    
+    def store_to_mongo(self, user: ...):
+        self._repos[0].store(user)
+```
+
 ## Clearing di cache
 
 Sometimes it might come handy to clear cached services in di container. Simple way of 

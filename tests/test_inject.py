@@ -1,10 +1,11 @@
-from typing import Dict, Union
+from typing import Dict, Union, List
 import pytest
 
 from kink import di, Container
 from kink import inject
 from kink.errors import ExecutionError
 import time
+import abc
 
 di["a"] = 1
 di["b"] = "test"
@@ -115,7 +116,6 @@ def test_inject_with_custom_di() -> None:
 
 
 def test_inject_as_factory() -> None:
-
     @inject(use_factory=True)
     class X:
         def __init__(self):
@@ -126,3 +126,35 @@ def test_inject_as_factory() -> None:
 
     assert x_1 != x_2
     assert x_1.time != x_2.time
+
+
+def test_injecting_alias_list() -> None:
+    # given
+    class Interface(abc.ABC):
+        ...
+
+    @inject(alias=Interface)
+    class ConcreteA(Interface):
+        ...
+
+    @inject(alias=Interface)
+    class ConcreteB(Interface):
+        ...
+
+    @inject(alias=Interface)
+    class ConcreteC(Interface):
+        ...
+
+    @inject()
+    class UseAllInterface:
+        def __init__(self, concretes: List[Interface]):
+            self.concretes = concretes
+
+    # when
+    instance = di[UseAllInterface]
+
+    # then
+    assert len(instance.concretes) == 3
+    assert instance.concretes[0] == di[ConcreteA]
+    assert instance.concretes[1] == di[ConcreteB]
+    assert instance.concretes[2] == di[ConcreteC]

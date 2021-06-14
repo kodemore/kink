@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kink"
-version = "0.5.1"
+version = "0.6.0"
 description = "Dependency injection for python."
 authors = [
     "Dawid Kraczkowski <dawid.kraczkowski@gmail.com>"
@@ -21,7 +21,7 @@ classifiers = [
 
 # Requirements
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.7"
 typing_extensions = "^3.7.4"
 
 
