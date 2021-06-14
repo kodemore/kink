@@ -21,7 +21,7 @@ classifiers = [
 
 # Requirements
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.7"
 typing_extensions = "^3.7.4"
 
 
