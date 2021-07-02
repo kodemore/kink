@@ -297,3 +297,7 @@ from kink import inject, di
 
 di.clear_cache() # this will clear cache of all services inside di container that are not factorised services
 ```
+
+# Articles on Kink
+
+[https://www.netguru.com/codestories/dependency-injection-with-python-make-it-easy](https://www.netguru.com/codestories/dependency-injection-with-python-make-it-easy)
