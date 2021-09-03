@@ -193,7 +193,7 @@ from sqlite3 import connect, Connection
 di["db_name"] = "test_db.db"
 di[Connection] = lambda di: connect(di["db_name"])  # sqlite connection can be accessed by its type
 
-@inject # Constructor innjection will happen here
+@inject # Constructor injection will happen here
 class UserRepository:
   def __init__(self, db: Connection): # `db` argument will be resolved because `Connection` instance is present in the container. 
     self.db = db
