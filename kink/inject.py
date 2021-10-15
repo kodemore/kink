@@ -138,13 +138,13 @@ def _decorate(binding: Dict[str, Any], service: Type[T], container: Container) -
 
 
 def inject(
-    _service: Type[T] = None,
+    _service: Any = None,
     alias: Any = None,
     bind: Dict[str, Any] = None,
     container: Container = di,
     use_factory: bool = False,
-) -> Type[T]:
-    def _decorator(_service: Type[T]) -> Type[T]:
+) -> Any:
+    def _decorator(_service: Any) -> Any:
         if isclass(_service):
             setattr(
                 _service, "__init__", _decorate(bind or {}, getattr(_service, "__init__"), container),
