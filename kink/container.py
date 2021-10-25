@@ -29,16 +29,11 @@ class Container:
         if key in self._factories:
             return self._factories[key](self)
 
-        service = self._get(key)
-
-        if service is not None:
-            return service
+        if key in self._services:
+            return self._get(key)
 
         if key in self._aliases:
-            service = self._get(self._aliases[key][0])  # By default return first aliased service
-
-        if service is not None:
-            return service
+            return self._get(self._aliases[key][0])  # By default return first aliased service
 
         # Support aliasing
         if self._has_alias_list_for(key):
