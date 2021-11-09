@@ -37,3 +37,7 @@ pytest-cov = "^2.5"
 requests = "^2.24.0"
 starlette = "^0.13.4"
 
+[build-system]
+requires = ["poetry-core>=1.0.0", "setuptools"]
+build-backend = "poetry.core.masonry.api"
+
