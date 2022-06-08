@@ -10,6 +10,7 @@ from .container import di, Container
 from .errors import ExecutionError
 
 T = TypeVar("T")
+F = TypeVar("F")
 
 
 Undefined = NewType("Undefined", int)
@@ -34,7 +35,8 @@ class Parameter:
 
 
 def _inspect_function_arguments(function: Callable,) -> Tuple[Tuple[str, ...], Dict[str, Parameter]]:
-    parameters_name: Tuple[str, ...] = tuple(signature(function).parameters.keys())
+    parameters_name: Tuple[str, ...] = tuple(
+        signature(function).parameters.keys())
     parameters = {}
 
     for name, parameter in signature(function).parameters.items():
@@ -94,12 +96,14 @@ def _decorate(binding: Dict[str, Any], service: Type[T], container: Container) -
         if len(passed_kwargs) == len(parameters_name):
             return passed_kwargs
 
-        resolved_kwargs = _resolve_function_kwargs(binding, parameters_name, parameters, container)
+        resolved_kwargs = _resolve_function_kwargs(
+            binding, parameters_name, parameters, container)
 
         all_kwargs = {**resolved_kwargs, **passed_kwargs}
 
         if len(all_kwargs) < len(parameters_name):
-            missing_parameters = [arg for arg in parameters_name if arg not in all_kwargs]
+            missing_parameters = [
+                arg for arg in parameters_name if arg not in all_kwargs]
             raise ExecutionError(
                 "Cannot execute function without required parameters. "
                 + f"Did you forget to bind the following parameters: `{'`, `'.join(missing_parameters)}`?"
@@ -138,16 +142,17 @@ def _decorate(binding: Dict[str, Any], service: Type[T], container: Container) -
 
 
 def inject(
-    _service: Any = None,
+    _service: 'F' = None,
     alias: Any = None,
     bind: Dict[str, Any] = None,
     container: Container = di,
     use_factory: bool = False,
-) -> Any:
+) -> 'F':
     def _decorator(_service: Any) -> Any:
         if isclass(_service):
             setattr(
-                _service, "__init__", _decorate(bind or {}, getattr(_service, "__init__"), container),
+                _service, "__init__", _decorate(
+                    bind or {}, getattr(_service, "__init__"), container),
             )
             if use_factory:
                 container.factories[_service] = lambda _di: _service()
