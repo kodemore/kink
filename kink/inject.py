@@ -47,7 +47,9 @@ class Parameter:
         self.default = default
 
 
-def _inspect_function_arguments(function: Callable,) -> Tuple[Tuple[str, ...], Dict[str, Parameter]]:
+def _inspect_function_arguments(
+    function: Callable,
+) -> Tuple[Tuple[str, ...], Dict[str, Parameter]]:
     parameters_name: Tuple[str, ...] = tuple(signature(function).parameters.keys())
     parameters = {}
 
@@ -68,7 +70,10 @@ def _inspect_function_arguments(function: Callable,) -> Tuple[Tuple[str, ...], D
 
 
 def _resolve_function_kwargs(
-    alias_map: Dict[str, str], parameters_name: Tuple[str, ...], parameters: Dict[str, Parameter], container: Container,
+    alias_map: Dict[str, str],
+    parameters_name: Tuple[str, ...],
+    parameters: Dict[str, Parameter],
+    container: Container,
 ) -> Dict[str, Any]:
     resolved_kwargs = {}
     for name in parameters_name:
@@ -167,7 +172,9 @@ def inject(
     def _decorator(_service: Any) -> Any:
         if isclass(_service):
             setattr(
-                _service, "__init__", _decorate(bind or {}, getattr(_service, "__init__"), container),
+                _service,
+                "__init__",
+                _decorate(bind or {}, getattr(_service, "__init__"), container),
             )
             if use_factory:
                 container.factories[_service] = lambda _di: _service()
