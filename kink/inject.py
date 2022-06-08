@@ -1,8 +1,9 @@
 import asyncio
-from functools import wraps
+import sys
 from abc import ABC
+from functools import wraps
 from inspect import Parameter as InspectParameter, isclass, signature
-from typing import Any, Callable, Dict, NewType, Tuple, Type, TypeVar
+from typing import Any, Callable, Dict, NewType, Tuple, Type, TypeVar, ForwardRef, Union
 
 from typing_extensions import Protocol
 
@@ -23,6 +24,18 @@ class _ProtocolInit(Protocol):
 _no_init = _ProtocolInit.__init__
 
 
+def _resolve_forward_reference(module: Any, ref: Union[str, ForwardRef]) -> Any:
+    if isinstance(ref, str):
+        name = ref
+    else:
+        name = ref.__forward_arg__
+
+    if name in sys.modules[module].__dict__:
+        return sys.modules[module].__dict__[name]
+
+    return None
+
+
 class Parameter:
     type: Any
     name: str
@@ -40,9 +53,15 @@ def _inspect_function_arguments(function: Callable,) -> Tuple[Tuple[str, ...], D
     parameters = {}
 
     for name, parameter in signature(function).parameters.items():
+
+        if isinstance(parameter.annotation, (str, ForwardRef)) and hasattr(function, "__module__"):
+            annotation = _resolve_forward_reference(function.__module__, parameter.annotation)
+        else:
+            annotation = parameter.annotation
+
         parameters[name] = Parameter(
             parameter.name,
-            parameter.annotation,
+            annotation,
             parameter.default if parameter.default is not InspectParameter.empty else Undefined,
         )
 
