@@ -1,8 +1,9 @@
 import asyncio
-from functools import wraps
+import sys
 from abc import ABC
+from functools import wraps
 from inspect import Parameter as InspectParameter, isclass, signature
-from typing import Any, Callable, Dict, NewType, Tuple, Type, TypeVar
+from typing import Any, Callable, Dict, NewType, Tuple, Type, TypeVar, Union, ForwardRef  # type: ignore
 
 from typing_extensions import Protocol
 
@@ -23,6 +24,18 @@ class _ProtocolInit(Protocol):
 _no_init = _ProtocolInit.__init__
 
 
+def _resolve_forward_reference(module: Any, ref: Union[str, ForwardRef]) -> Any:
+    if isinstance(ref, str):
+        name = ref
+    else:
+        name = ref.__forward_arg__
+
+    if name in sys.modules[module].__dict__:
+        return sys.modules[module].__dict__[name]
+
+    return None
+
+
 class Parameter:
     type: Any
     name: str
@@ -34,15 +47,22 @@ class Parameter:
         self.default = default
 
 
-def _inspect_function_arguments(function: Callable,) -> Tuple[Tuple[str, ...], Dict[str, Parameter]]:
-    parameters_name: Tuple[str, ...] = tuple(
-        signature(function).parameters.keys())
+def _inspect_function_arguments(
+    function: Callable,
+) -> Tuple[Tuple[str, ...], Dict[str, Parameter]]:
+    parameters_name: Tuple[str, ...] = tuple(signature(function).parameters.keys())
     parameters = {}
 
     for name, parameter in signature(function).parameters.items():
+
+        if isinstance(parameter.annotation, (str, ForwardRef)) and hasattr(function, "__module__"):
+            annotation = _resolve_forward_reference(function.__module__, parameter.annotation)
+        else:
+            annotation = parameter.annotation
+
         parameters[name] = Parameter(
             parameter.name,
-            parameter.annotation,
+            annotation,
             parameter.default if parameter.default is not InspectParameter.empty else Undefined,
         )
 
@@ -50,7 +70,10 @@ def _inspect_function_arguments(function: Callable,) -> Tuple[Tuple[str, ...], D
 
 
 def _resolve_function_kwargs(
-    alias_map: Dict[str, str], parameters_name: Tuple[str, ...], parameters: Dict[str, Parameter], container: Container,
+    alias_map: Dict[str, str],
+    parameters_name: Tuple[str, ...],
+    parameters: Dict[str, Parameter],
+    container: Container,
 ) -> Dict[str, Any]:
     resolved_kwargs = {}
     for name in parameters_name:
@@ -96,14 +119,12 @@ def _decorate(binding: Dict[str, Any], service: Type[T], container: Container) -
         if len(passed_kwargs) == len(parameters_name):
             return passed_kwargs
 
-        resolved_kwargs = _resolve_function_kwargs(
-            binding, parameters_name, parameters, container)
+        resolved_kwargs = _resolve_function_kwargs(binding, parameters_name, parameters, container)
 
         all_kwargs = {**resolved_kwargs, **passed_kwargs}
 
         if len(all_kwargs) < len(parameters_name):
-            missing_parameters = [
-                arg for arg in parameters_name if arg not in all_kwargs]
+            missing_parameters = [arg for arg in parameters_name if arg not in all_kwargs]
             raise ExecutionError(
                 "Cannot execute function without required parameters. "
                 + f"Did you forget to bind the following parameters: `{'`, `'.join(missing_parameters)}`?"
@@ -142,17 +163,18 @@ def _decorate(binding: Dict[str, Any], service: Type[T], container: Container) -
 
 
 def inject(
-    _service: 'F' = None,
+    _service: "F" = None,
     alias: Any = None,
     bind: Dict[str, Any] = None,
     container: Container = di,
     use_factory: bool = False,
-) -> 'F':
+) -> "F":
     def _decorator(_service: Any) -> Any:
         if isclass(_service):
             setattr(
-                _service, "__init__", _decorate(
-                    bind or {}, getattr(_service, "__init__"), container),
+                _service,
+                "__init__",
+                _decorate(bind or {}, getattr(_service, "__init__"), container),
             )
             if use_factory:
                 container.factories[_service] = lambda _di: _service()

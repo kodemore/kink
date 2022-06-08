@@ -28,12 +28,12 @@ typing_extensions = "^4.1.1"
 
 
 [tool.poetry.dev-dependencies]
-black = { version = "^19.3b0", python = "^3.6" }
 isort = "^5.7.0"
-mypy = "^0.730.0"
 pytest = "^5.4.3"
 pytest-asyncio = "^0.14.0"
 pytest-cov = "^2.5"
 requests = "^2.24.0"
 starlette = "^0.13.4"
+black = "^22.3.0"
+mypy = "^0.961"
 
