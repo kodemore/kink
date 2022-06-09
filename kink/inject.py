@@ -11,7 +11,10 @@ from .container import di, Container
 from .errors import ExecutionError
 
 T = TypeVar("T")
-F = TypeVar("F")
+S = TypeVar("S")
+
+ServiceDefinition = Union[Type[S], Callable]
+ServiceResult = Union[S, Callable]
 
 
 Undefined = NewType("Undefined", int)
@@ -163,13 +166,13 @@ def _decorate(binding: Dict[str, Any], service: Type[T], container: Container) -
 
 
 def inject(
-    _service: "F" = None,
+    _service: ServiceDefinition = None,
     alias: Any = None,
     bind: Dict[str, Any] = None,
     container: Container = di,
     use_factory: bool = False,
-) -> "F":
-    def _decorator(_service: Any) -> Any:
+) -> Union[ServiceResult, Callable[[ServiceDefinition], ServiceResult]]:
+    def _decorator(_service: ServiceDefinition) -> ServiceResult:
         if isclass(_service):
             setattr(
                 _service,
