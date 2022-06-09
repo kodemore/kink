@@ -160,9 +160,9 @@ def _decorate(binding: Dict[str, Any], service: ServiceDefinition, container: Co
         return await service(**all_kwargs)
 
     if asyncio.iscoroutinefunction(service):
-        return _async_decorated  # type: ignore
+        return _async_decorated
 
-    return _decorated  # type: ignore
+    return _decorated
 
 
 def inject(
@@ -198,7 +198,7 @@ def inject(
         return service_function
 
     if _service is None:
-        return _decorator  # type: ignore
+        return _decorator
 
     return _decorator(_service)
 
