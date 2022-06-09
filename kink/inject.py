@@ -98,7 +98,7 @@ def _resolve_function_kwargs(
     return resolved_kwargs
 
 
-def _decorate(binding: Dict[str, Any], service: Type[T], container: Container) -> Type[T]:  # type: ignore
+def _decorate(binding: Dict[str, Any], service: ServiceDefinition, container: Container) -> ServiceResult:
 
     # ignore abstract class initialiser and protocol initialisers
     if (
