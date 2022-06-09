@@ -11,7 +11,10 @@ from .container import di, Container
 from .errors import ExecutionError
 
 T = TypeVar("T")
-F = TypeVar("F")
+S = TypeVar("S")
+
+ServiceDefinition = Union[Type[S], Callable]
+ServiceResult = Union[S, Callable]
 
 
 Undefined = NewType("Undefined", int)
@@ -95,7 +98,7 @@ def _resolve_function_kwargs(
     return resolved_kwargs
 
 
-def _decorate(binding: Dict[str, Any], service: Type[T], container: Container) -> Type[T]:  # type: ignore
+def _decorate(binding: Dict[str, Any], service: ServiceDefinition, container: Container) -> ServiceResult:
 
     # ignore abstract class initialiser and protocol initialisers
     if (
@@ -157,19 +160,19 @@ def _decorate(binding: Dict[str, Any], service: Type[T], container: Container) -
         return await service(**all_kwargs)
 
     if asyncio.iscoroutinefunction(service):
-        return _async_decorated  # type: ignore
+        return _async_decorated
 
-    return _decorated  # type: ignore
+    return _decorated
 
 
 def inject(
-    _service: "F" = None,
+    _service: ServiceDefinition = None,
     alias: Any = None,
     bind: Dict[str, Any] = None,
     container: Container = di,
     use_factory: bool = False,
-) -> "F":
-    def _decorator(_service: Any) -> Any:
+) -> Union[ServiceResult, Callable[[ServiceDefinition], ServiceResult]]:
+    def _decorator(_service: ServiceDefinition) -> ServiceResult:
         if isclass(_service):
             setattr(
                 _service,
@@ -195,7 +198,7 @@ def inject(
         return service_function
 
     if _service is None:
-        return _decorator  # type: ignore
+        return _decorator
 
     return _decorator(_service)
 
