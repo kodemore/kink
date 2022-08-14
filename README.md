@@ -224,7 +224,7 @@ class UserRepository(AbstractRepository):
     ...
 
 
-repository = UserRepository()
+repository = di[UserRepository] # will retrieve instance of UserRepository from di container
 repository.connection # mysql db connection is resolved and available to use.
 ```
 
