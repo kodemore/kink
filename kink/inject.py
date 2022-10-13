@@ -207,10 +207,10 @@ def inject(
 
 class _Injectable:
     def __getitem__(self, item: Type[I]) -> I:
-        return item
+        return item  # type: ignore
 
 
-Injectable: TypeAlias = _Injectable()
+Injectable: TypeAlias = _Injectable()  # type: ignore[misc]
 
 
 __all__ = ["inject", "Injectable"]
