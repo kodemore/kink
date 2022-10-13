@@ -3,13 +3,15 @@ import sys
 from abc import ABC
 from functools import wraps
 from inspect import Parameter as InspectParameter, isclass, signature
-from typing import Any, Callable, Dict, NewType, Tuple, Type, TypeVar, Union, ForwardRef  # type: ignore
+from typing import Any, Callable, Dict, NewType, Tuple, Type, TypeVar, Union, \
+    ForwardRef, Generic  # type: ignore
 
-from typing_extensions import Protocol
+from typing_extensions import Protocol, TypeAlias
 
 from .container import di, Container
 from .errors import ExecutionError
 
+I = TypeVar("I")
 T = TypeVar("T")
 S = TypeVar("S")
 
@@ -203,4 +205,12 @@ def inject(
     return _decorator(_service)
 
 
-__all__ = ["inject"]
+class _Injectable:
+    def __getitem__(self, item: Type[I]) -> I:
+        return item
+
+
+Injectable: TypeAlias = _Injectable()
+
+
+__all__ = ["inject", "Injectable"]
