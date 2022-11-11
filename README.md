@@ -300,4 +300,6 @@ di.clear_cache() # this will clear cache of all services inside di container tha
 
 # Articles on Kink
 
-[https://www.netguru.com/codestories/dependency-injection-with-python-make-it-easy](https://www.netguru.com/codestories/dependency-injection-with-python-make-it-easy)
+- [https://www.netguru.com/codestories/dependency-injection-with-python-make-it-easy](https://www.netguru.com/codestories/dependency-injection-with-python-make-it-easy)
+- https://github.com/szymon6927/hexagonal-architecture-python - example of FastAPI app that uses **kink**
+
