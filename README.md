@@ -324,7 +324,7 @@ async def create_client(
 ```
 
 A complete example, together with tests you can find it [here](https://github.com/szymon6927/hexagonal-architecture-python
-)
+).
 
 # Articles on Kink
 
