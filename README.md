@@ -323,8 +323,8 @@ async def create_client(
     return JSONResponse(content=result.dict(), status_code=status.HTTP_201_CREATED)
 ```
 
-A complete example, together with tests you can find it here https://github.com/szymon6927/hexagonal-architecture-python
-
+A complete example, together with tests you can find it [here](https://github.com/szymon6927/hexagonal-architecture-python
+)
 
 # Articles on Kink
 
