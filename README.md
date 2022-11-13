@@ -298,8 +298,35 @@ from kink import inject, di
 di.clear_cache() # this will clear cache of all services inside di container that are not factorised services
 ```
 
+## Integration with FastAPI
+
+```python
+from fastapi import APIRouter, Depends, status
+from fastapi.responses import JSONResponse, Response
+from kink import di
+
+router = APIRouter()
+
+# register service in the DI container
+di[ClientService] = ClientService()
+
+@router.post(
+    "/clients",
+    response_model=ClientDTO,
+    responses={400: {"model": APIErrorMessage}, 500: {"model": APIErrorMessage}},
+    tags=["clients"],
+)
+async def create_client(
+    request: CreateClientDTO, service: ClientService = Depends(lambda: di[ClientService])
+) -> JSONResponse:
+    result = service.create(request)
+    return JSONResponse(content=result.dict(), status_code=status.HTTP_201_CREATED)
+```
+
+A complete example, together with tests you can find it here https://github.com/szymon6927/hexagonal-architecture-python
+
+
 # Articles on Kink
 
 - [https://www.netguru.com/codestories/dependency-injection-with-python-make-it-easy](https://www.netguru.com/codestories/dependency-injection-with-python-make-it-easy)
-- https://github.com/szymon6927/hexagonal-architecture-python - example of FastAPI app that uses **kink**
 
