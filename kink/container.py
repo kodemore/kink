@@ -4,6 +4,9 @@ from typing import Any, Dict, Type, Union, Callable, List
 from kink.errors.service_error import ServiceError
 
 
+_MISSING_SERVICE = object()
+
+
 class Container:
     def __init__(self):
         self._memoized_services: Dict[Union[str, Type], Any] = {}
@@ -31,13 +34,13 @@ class Container:
 
         service = self._get(key)
 
-        if service is not None:
+        if service is not _MISSING_SERVICE:
             return service
 
         if key in self._aliases:
             service = self._get(self._aliases[key][0])  # By default return first aliased service
 
-        if service is not None:
+        if service is not _MISSING_SERVICE:
             return service
 
         # Support aliasing
@@ -53,7 +56,7 @@ class Container:
             return self._memoized_services[key]
 
         if key not in self._services:
-            return None
+            return _MISSING_SERVICE
 
         value = self._services[key]
 
