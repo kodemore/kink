@@ -38,7 +38,10 @@ class Container:
             return service
 
         if key in self._aliases:
-            service = self._get(self._aliases[key][0])  # By default return first aliased service
+            unaliased_key = self._aliases[key][0] # By default return first aliased service
+            if unaliased_key in self._factories:
+                return self._factories[unaliased_key](self)
+            service = self._get(unaliased_key)  
 
         if service is not _MISSING_SERVICE:
             return service
