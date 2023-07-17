@@ -76,7 +76,7 @@ No need for manual work and manual dependency management. Give it a try and you 
 To fully utilise the potential of kink it is recommended to bootstrap your initial dependencies
 (config values, or instances of classes that are standalone, requires no other dependencies than themselves).
 Some people prefer to keep it in `__init__.py` in the top module of your application, other
-create separate `bootstra.py` file for this purpose. Once all is setup the only step left 
+create separate `bootstrap.py` file for this purpose. Once all is setup the only step left 
 is to decorate your classes/functions with `@inject` decorator.
 
 ## Bootstrapping/Adding services manually
