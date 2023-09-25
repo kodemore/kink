@@ -1,11 +1,10 @@
+import abc
+import time
 from typing import Dict, Union, List
-import pytest
 
 from kink import di, Container
 from kink import inject
 from kink.errors import ExecutionError
-import time
-import abc
 
 di["a"] = 1
 di["b"] = "test"

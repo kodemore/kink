@@ -1,4 +1,3 @@
-
 from kink import inject, di
 
 class Repository:
