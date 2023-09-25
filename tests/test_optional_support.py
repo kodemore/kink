@@ -13,9 +13,9 @@ def test_can_inject_optional_support_with_present_value() -> None:
     di[Message] = Message("Hello world")
 
     @inject()
-    def inject_test(message: Optional[Message] = None):
-        if message:
-            return message.value
+    def inject_test(a_message: Optional[Message] = None):
+        if a_message:
+            return a_message.value
         return ""
 
     assert inject_test() == "Hello world"
@@ -27,9 +27,9 @@ def test_can_inject_optional_support_without_present_value() -> None:
             self.value = value
 
     @inject()
-    def inject_test(message: Optional[Message] = None):
-        if message:
-            return message.value
+    def inject_test(a_message: Optional[Message] = None):
+        if a_message:
+            return a_message.value
         return ""
 
     assert inject_test() == ""

@@ -1,5 +1,6 @@
 from types import LambdaType
 from typing import Any, Dict, Type, Union, Callable, List
+from kink.typing_support import is_optional, unpack_optional
 
 from kink.errors.service_error import ServiceError
 
@@ -31,6 +32,9 @@ class Container:
     def __getitem__(self, key: Union[str, Type]) -> Any:
         if key in self._factories:
             return self._factories[key](self)
+
+        if is_optional(key):
+            return self[unpack_optional(key)]
 
         service = self._get(key)
 
@@ -77,6 +81,10 @@ class Container:
 
         if self._has_alias_list_for(key):
             return True
+
+        if is_optional(key):
+            return unpack_optional(key) in self
+
 
         return False
 
