@@ -102,7 +102,7 @@ def _decorate(binding: Dict[str, Any], service: ServiceDefinition, container: Co
 
     # ignore abstract class initialiser and protocol initialisers
     if (
-        service in [ABC.__init__, _no_init] or service.__name__ == "_no_init"
+        service in [ABC.__init__, _no_init] or service.__name__ in ["_no_init", "_no_init_or_replace_init"]
     ):  # FIXME: fix this when typing_extensions library gets fixed
         return service
 
