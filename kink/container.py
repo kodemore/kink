@@ -32,12 +32,10 @@ class Container:
         self._aliases[name].append(target)
 
     @overload
-    def __getitem__(self, key: str) -> Any:
-        ...
+    def __getitem__(self, key: str) -> Any: ...
 
     @overload
-    def __getitem__(self, key: Type[T]) -> T:
-        ...
+    def __getitem__(self, key: Type[T]) -> T: ...
 
     def __getitem__(self, key):
         if key in self._factories:
