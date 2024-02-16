@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Protocol
+from typing import Protocol, List
 
 from kink import inject, di
 
@@ -26,7 +26,7 @@ class Repository2(Repository):
 
 @inject
 class Service:
-    def __init__(self, repositories: list[Repository]):
+    def __init__(self, repositories: List[Repository]):
         self._repositories = repositories
 
 
@@ -37,6 +37,6 @@ def test_can_inject_aliased_factory_services():
     assert len(service._repositories) == 3
     repository: Repository = di[Repository2]
     assert repository.repo is not None
-    repositories: list[Repository] = di[list[Repository]]
+    repositories: List[Repository] = di[List[Repository]]
     assert repositories is not None
     assert len(repositories) == 3
