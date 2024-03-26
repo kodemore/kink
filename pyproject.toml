@@ -23,17 +23,18 @@ include = ["kink/py.typed"]
 
 # Requirements
 [tool.poetry.dependencies]
-python = "^3.7"
-typing_extensions = "^4.1.1"
+python = "^3.8"
+typing_extensions = "^4.9.0"
 
 
 [tool.poetry.dev-dependencies]
-isort = "^5.7.0"
-pytest = "^5.4.3"
-pytest-asyncio = "^0.14.0"
-pytest-cov = "^2.5"
+isort = "^5.13.2"
+pytest = "^8.0.0"
+pytest-asyncio = "^0.23.5"
+pytest-cov = "^4.1.0"
 requests = "^2.31.0"
-starlette = "^0.13.4"
-black = "^22.3.0"
-mypy = "^0.961"
+starlette = "^0.37.1"
+httpx = "^0.26.0"
+black = "^24.2.0"
+mypy = "^1.8.0"
 
