@@ -3,7 +3,7 @@ import sys
 from abc import ABC
 from functools import wraps
 from inspect import Parameter as InspectParameter, isclass, signature
-from typing import Any, Callable, Dict, NewType, Tuple, Type, TypeVar, Union, ForwardRef  # type: ignore
+from typing import Any, Callable, Dict, NewType, Tuple, Type, TypeVar, Union, ForwardRef, Optional  # type: ignore
 
 from typing_extensions import Protocol
 
@@ -101,9 +101,10 @@ def _resolve_function_kwargs(
 def _decorate(binding: Dict[str, Any], service: ServiceDefinition, container: Container) -> ServiceResult:
 
     # ignore abstract class initialiser and protocol initialisers
-    if (
-        service in [ABC.__init__, _no_init] or service.__name__ == "_no_init"
-    ):  # FIXME: fix this when typing_extensions library gets fixed
+    if service in [ABC.__init__, _no_init] or service.__name__ in [
+        "_no_init",
+        "_no_init_or_replace_init",
+    ]:  # FIXME: fix this when typing_extensions library gets fixed
         return service
 
     # Add class definition to dependency injection
@@ -166,9 +167,9 @@ def _decorate(binding: Dict[str, Any], service: ServiceDefinition, container: Co
 
 
 def inject(
-    _service: ServiceDefinition = None,
-    alias: Any = None,
-    bind: Dict[str, Any] = None,
+    _service: Optional[ServiceDefinition] = None,
+    alias: Optional[Any] = None,
+    bind: Optional[Dict[str, Any]] = None,
     container: Container = di,
     use_factory: bool = False,
 ) -> Union[ServiceResult, Callable[[ServiceDefinition], ServiceResult]]:
