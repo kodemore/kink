@@ -1,4 +1,5 @@
 import asyncio
+import functools
 import sys
 from abc import ABC
 from functools import wraps
@@ -53,6 +54,9 @@ class Parameter:
 def _inspect_function_arguments(
     function: Callable,
 ) -> Tuple[Tuple[str, ...], Dict[str, Parameter]]:
+    if isinstance(function, functools._lru_cache_wrapper):
+        function = function.__wrapped__
+
     parameters_name: Tuple[str, ...] = tuple(signature(function).parameters.keys())
     parameters = {}
 
