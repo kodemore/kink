@@ -123,7 +123,10 @@ def _decorate(binding: Dict[str, Any], service: ServiceDefinition, container: Co
         if len(passed_kwargs) == len(parameters_name):
             return passed_kwargs
 
-        resolved_kwargs = _resolve_function_kwargs(binding, parameters_name, parameters, container)
+        # do not resolve for passed kwargs and args
+        parameters_name_to_resolve = tuple(parameters_name - passed_kwargs.keys())
+
+        resolved_kwargs = _resolve_function_kwargs(binding, parameters_name_to_resolve, parameters, container)
 
         all_kwargs = {**resolved_kwargs, **passed_kwargs}
 
