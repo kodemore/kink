@@ -9,13 +9,13 @@ jobs:
   pypi:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Get tag
         id: tag
         run: |
           echo ::set-output name=tag::${GITHUB_REF#refs/tags/}
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.7'
       - name: Install dependencies
@@ -27,7 +27,7 @@ jobs:
         run: |
           poetry build
       - name: Upload artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: kink-${{ steps.tag.outputs.tag }}.tar.gz
           path: dist/kink-${{ steps.tag.outputs.tag }}.tar.gz
