@@ -124,7 +124,7 @@ def _decorate(binding: Dict[str, Any], service: ServiceDefinition, container: Co
                 passed_kwargs[parameters_name[key]] = value
 
         # prioritise passed kwargs and args resolving
-        if len(passed_kwargs) == len(parameters_name):
+        if set(passed_kwargs.keys()) == set(parameters_name):
             return passed_kwargs
 
         resolved_kwargs = _resolve_function_kwargs(binding, parameters_name, parameters, container)
