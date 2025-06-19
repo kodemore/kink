@@ -38,3 +38,6 @@ httpx = "^0.26.0"
 black = "^24.2.0"
 mypy = "^1.8.0"
 
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
