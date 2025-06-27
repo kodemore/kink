@@ -23,6 +23,46 @@ class Container:
         if key in self._memoized_services:
             del self._memoized_services[key]
 
+    def __delitem__(self, key: Union[str, Type]) -> None:
+        """Remove a service from the container."""
+        service_exists = False
+
+        # Remove from services
+        if key in self._services:
+            del self._services[key]
+            service_exists = True
+
+        # Remove from factories
+        if key in self._factories:
+            del self._factories[key]
+            service_exists = True
+
+        # Remove from memoized services
+        if key in self._memoized_services:
+            del self._memoized_services[key]
+
+        # Remove from aliases (if key is used as an alias target)
+        aliases_to_remove = []
+        for alias_name, targets in self._aliases.items():
+            if key in targets:
+                targets.remove(key)
+                if not targets:  # Remove empty alias lists
+                    aliases_to_remove.append(alias_name)
+
+        for alias_name in aliases_to_remove:
+            del self._aliases[alias_name]
+
+        # Remove if key is an alias itself
+        if key in self._aliases:
+            del self._aliases[key]
+
+        # Clear any List[key] memoized services
+        if List[key] in self._memoized_services:  # type: ignore
+            del self._memoized_services[List[key]]  # type: ignore
+
+        if not service_exists:
+            raise KeyError(f"Service {key} is not registered.")
+
     def add_alias(self, name: Union[str, Type], target: Union[str, Type]):
         if List[target] in self._memoized_services:  # type: ignore
             del self._memoized_services[List[target]]  # type: ignore
