@@ -147,6 +147,22 @@ connection = di["db_connection"] # will return instance of sqlite3.Connection
 assert connection == di["db_connection"] # True
 ```
 
+## Removing services from dependency injection container
+
+Services can be removed from the container using the `del` statement, just like with a regular dictionary:
+
+```python
+from kink import di
+
+# Add a service
+di["temp_service"] = "temporary_value"
+assert "temp_service" in di
+
+# Remove the service
+del di["temp_service"]
+assert "temp_service" not in di
+```
+
 
 ## Autowiring dependencies
 
