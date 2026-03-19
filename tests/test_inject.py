@@ -1,5 +1,4 @@
 import abc
-import time
 from typing import Dict, Union, List
 
 from kink import di, Container
@@ -118,13 +117,13 @@ def test_inject_as_factory() -> None:
     @inject(use_factory=True)
     class X:
         def __init__(self):
-            self.time = time.time()
+            self.instance_marker = object()
 
     x_1 = di[X]
     x_2 = di[X]
 
     assert x_1 != x_2
-    assert x_1.time != x_2.time
+    assert x_1.instance_marker != x_2.instance_marker
 
 
 def test_injecting_alias_list() -> None:
