@@ -12,6 +12,7 @@ from .errors import ExecutionError
 
 T = TypeVar("T")
 S = TypeVar("S")
+F = TypeVar("F", bound=Callable[..., Any])
 
 ServiceDefinition = Union[Type[S], Callable]
 ServiceResult = Union[S, Callable]
