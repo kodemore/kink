@@ -1,9 +1,8 @@
-import asyncio
 import functools
 import sys
 from abc import ABC
 from functools import wraps
-from inspect import Parameter as InspectParameter, isclass, signature
+from inspect import Parameter as InspectParameter, isclass, signature, iscoroutinefunction
 from typing import Any, Callable, Dict, NewType, Tuple, Type, TypeVar, Union, ForwardRef, Optional  # type: ignore
 
 from typing_extensions import Protocol
@@ -164,7 +163,7 @@ def _decorate(binding: Dict[str, Any], service: ServiceDefinition, container: Co
         all_kwargs = _resolve_kwargs(args, kwargs)
         return await service(**all_kwargs)
 
-    if asyncio.iscoroutinefunction(service):
+    if iscoroutinefunction(service):
         return _async_decorated
 
     return _decorated
